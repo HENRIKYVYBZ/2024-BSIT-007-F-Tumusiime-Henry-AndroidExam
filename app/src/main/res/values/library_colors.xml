@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lib_navy">#0B2545</color>
+    <color name="lib_navy_dark">#071A33</color>
+    <color name="lib_gold">#E0A526</color>
+    <color name="lib_bg">#F3F5F9</color>
+    <color name="lib_card">#FFFFFF</color>
+    <color name="lib_border">#E1E6EF</color>
+    <color name="lib_text">#1B2433</color>
+    <color name="lib_muted">#5D6778</color>
+    <color name="lib_on_navy_muted">#B8C4D6</color>
+    <color name="lib_green">#167A4B</color>
+    <color name="lib_green_bg">#E3F4EA</color>
+    <color name="lib_red">#B3261E</color>
+    <color name="lib_red_bg">#FBE5E3</color>
+    <color name="lib_grey_bg">#ECEEF2</color>
+    <color name="lib_disabled">#AEB6C3</color>
+</resources>
