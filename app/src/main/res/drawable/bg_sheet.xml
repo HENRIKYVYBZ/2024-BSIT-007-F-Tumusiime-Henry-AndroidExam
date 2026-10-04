@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- White panel with rounded top corners, used under the login header -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lib_bg" />
+    <corners android:topLeftRadius="28dp" android:topRightRadius="28dp"
+        android:bottomLeftRadius="0dp" android:bottomRightRadius="0dp" />
+</shape>

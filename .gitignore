@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase config: keep it out of the public GitHub repo (include it in the submitted project folder instead)
+app/google-services.json
+
+# Not part of the app: copies and downloads
+/milestone1/
+/Claude outputs/

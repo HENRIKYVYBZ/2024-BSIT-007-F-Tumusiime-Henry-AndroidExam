@@ -54,6 +54,46 @@
     <string name="cancel_reservation">Cancel reservation</string>
     <string name="cancelled_toast">Reservation cancelled</string>
 
+    <!-- Sign in -->
+    <string name="login_tagline">Find books, reserve them, skip the queue</string>
+    <string name="welcome_back">Welcome back</string>
+    <string name="sign_in_subtitle">Sign in with your student account</string>
+    <string name="label_email">Email</string>
+    <string name="hint_email">e.g. name@gmail.com</string>
+    <string name="label_password">Password</string>
+    <string name="hint_password">Your password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="sign_in">Sign in</string>
+    <string name="signing_in">Signing in…</string>
+    <string name="new_here">New to the library?</string>
+    <string name="create_an_account">Create an account</string>
+
+    <!-- Sign up -->
+    <string name="create_account_title">Create account</string>
+    <string name="sign_up_intro">Use your real details. The library uses your registration number when it issues your books.</string>
+    <string name="hint_new_password">At least 8 characters, letters and numbers</string>
+    <string name="label_confirm_password">Confirm password</string>
+    <string name="hint_confirm_password">Type the password again</string>
+    <string name="create_account">Create account</string>
+    <string name="creating_account">Creating account…</string>
+    <string name="have_account">Already have an account?</string>
+    <string name="account_created">Welcome! We sent a verification link to %1$s.</string>
+
+    <!-- Forgot password -->
+    <string name="reset_title">Reset password</string>
+    <string name="reset_heading">Forgot your password?</string>
+    <string name="reset_intro">Enter the email you signed up with and we\'ll send you a link to choose a new password.</string>
+    <string name="send_reset_link">Send reset link</string>
+    <string name="sending">Sending…</string>
+    <string name="reset_sent">If an account exists for %1$s, a reset link is on its way. Check your inbox and spam folder, then sign in with your new password.</string>
+    <string name="back_to_sign_in">Back to sign in</string>
+
+    <!-- Signed-in header -->
+    <string name="greeting">Hi, %1$s</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_message">You will need your email and password to sign in again.</string>
+
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>

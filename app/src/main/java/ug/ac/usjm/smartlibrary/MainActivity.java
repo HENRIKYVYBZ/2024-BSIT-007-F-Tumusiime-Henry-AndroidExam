@@ -1,5 +1,7 @@
 package ug.ac.usjm.smartlibrary;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,12 +13,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.List;
 
+import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 
-/** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. */
+/** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in. */
 public class MainActivity extends AppCompatActivity {
 
     private LibraryRepository repo;
@@ -27,7 +33,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Only signed-in students may use the catalogue.
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            goToLogin();
+            return;
+        }
         setContentView(R.layout.activity_main);
+
+        ((TextView) findViewById(R.id.greeting)).setText(getString(R.string.greeting, firstName(user)));
+        findViewById(R.id.btn_sign_out).setOnClickListener(v -> confirmSignOut());
 
         repo = LibraryRepository.get(this);
         searchBox = (EditText) findViewById(R.id.search_box);
@@ -58,8 +74,39 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (adapter == null) return;   // redirected to the sign-in screen
         // Runs on first open and every time the user comes back, so the list is always current.
         loadBooks();
+    }
+
+    /** First name from the saved profile, else the Firebase display name, else the email. */
+    private String firstName(FirebaseUser user) {
+        String name = ProfileStore.name(this, user.getUid());
+        if (name == null) name = user.getDisplayName();
+        if (name == null || name.trim().isEmpty()) {
+            String email = user.getEmail();
+            return email == null ? "student" : email.substring(0, email.indexOf('@') > 0 ? email.indexOf('@') : email.length());
+        }
+        return name.trim().split("\\s+")[0];
+    }
+
+    private void confirmSignOut() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.sign_out_title)
+                .setMessage(R.string.sign_out_message)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.sign_out, (dialog, which) -> {
+                    FirebaseAuth.getInstance().signOut();
+                    goToLogin();
+                })
+                .show();
+    }
+
+    private void goToLogin() {
+        Intent i = new Intent(this, LoginActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
     }
 
     private void loadBooks() {

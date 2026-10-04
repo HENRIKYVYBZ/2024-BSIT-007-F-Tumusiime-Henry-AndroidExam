@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create account screen -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            style="@style/LibBackButton" />
+
+        <TextView
+            style="@style/LibHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text="@string/create_account_title" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/lib_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/sign_up_intro"
+                android:textColor="@color/lib_muted"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/error_text"
+                style="@style/LibErrorBox" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_name" />
+
+            <EditText
+                android:id="@+id/input_name"
+                style="@style/LibInput"
+                android:autofillHints="name"
+                android:hint="@string/hint_name"
+                android:imeOptions="actionNext"
+                android:inputType="textPersonName|textCapWords"
+                android:maxLength="60" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_reg" />
+
+            <EditText
+                android:id="@+id/input_reg"
+                style="@style/LibInput"
+                android:hint="@string/hint_reg"
+                android:imeOptions="actionNext"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:maxLength="20" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_email" />
+
+            <EditText
+                android:id="@+id/input_email"
+                style="@style/LibInput"
+                android:autofillHints="emailAddress"
+                android:hint="@string/hint_email"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_password" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/input_password"
+                    style="@style/LibInput"
+                    android:autofillHints="newPassword"
+                    android:hint="@string/hint_new_password"
+                    android:imeOptions="actionNext"
+                    android:inputType="textPassword"
+                    android:paddingRight="72dp" />
+
+                <TextView
+                    android:id="@+id/toggle_password"
+                    style="@style/LibPasswordToggle" />
+            </FrameLayout>
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_confirm_password" />
+
+            <EditText
+                android:id="@+id/input_confirm"
+                style="@style/LibInput"
+                android:autofillHints="newPassword"
+                android:hint="@string/hint_confirm_password"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword" />
+
+            <Button
+                android:id="@+id/btn_create"
+                style="@style/LibPrimaryButton"
+                android:layout_marginTop="28dp"
+                android:text="@string/create_account" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/have_account"
+                    android:textColor="@color/lib_muted"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/link_sign_in"
+                    style="@style/LibLink"
+                    android:text="@string/sign_in" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

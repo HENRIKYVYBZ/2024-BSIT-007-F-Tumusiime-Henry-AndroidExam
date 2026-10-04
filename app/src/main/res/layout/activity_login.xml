@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign in screen -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Brand header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="36dp"
+                android:paddingBottom="32dp">
+
+                <FrameLayout
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:background="@drawable/bg_logo_circle">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/ic_book" />
+                </FrameLayout>
+
+                <TextView
+                    style="@style/LibHeaderTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/catalogue_title"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/login_tagline"
+                    android:textColor="@color/lib_on_navy_muted"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Form sheet -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_sheet"
+                android:orientation="vertical"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/welcome_back"
+                    android:textColor="@color/lib_text"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/sign_in_subtitle"
+                    android:textColor="@color/lib_muted"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/error_text"
+                    style="@style/LibErrorBox" />
+
+                <TextView
+                    style="@style/LibLabel"
+                    android:text="@string/label_email" />
+
+                <EditText
+                    android:id="@+id/input_email"
+                    style="@style/LibInput"
+                    android:autofillHints="emailAddress"
+                    android:hint="@string/hint_email"
+                    android:imeOptions="actionNext"
+                    android:inputType="textEmailAddress" />
+
+                <TextView
+                    style="@style/LibLabel"
+                    android:text="@string/label_password" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/input_password"
+                        style="@style/LibInput"
+                        android:autofillHints="password"
+                        android:hint="@string/hint_password"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword"
+                        android:paddingRight="72dp" />
+
+                    <TextView
+                        android:id="@+id/toggle_password"
+                        style="@style/LibPasswordToggle" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/link_forgot"
+                    style="@style/LibLink"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/forgot_password" />
+
+                <Button
+                    android:id="@+id/btn_sign_in"
+                    style="@style/LibPrimaryButton"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sign_in" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/new_here"
+                        android:textColor="@color/lib_muted"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/link_sign_up"
+                        style="@style/LibLink"
+                        android:text="@string/create_an_account" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
