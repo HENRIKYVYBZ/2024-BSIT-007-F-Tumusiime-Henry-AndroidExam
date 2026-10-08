@@ -6,6 +6,8 @@ import android.database.SQLException;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -53,6 +55,16 @@ public class MainActivity extends AppCompatActivity {
         adapter = new BookAdapter(this);
         list.setAdapter(adapter);
         list.setEmptyView(findViewById(R.id.empty_view));
+
+        // Navigation: tap a book -> Book Details screen (the book id travels in the Intent).
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(MainActivity.this, BookDetailActivity.class);
+                i.putExtra(BookDetailActivity.EXTRA_BOOK_ID, id);
+                startActivity(i);
+            }
+        });
 
         // Search as the user types.
         searchBox.addTextChangedListener(new TextWatcher() {

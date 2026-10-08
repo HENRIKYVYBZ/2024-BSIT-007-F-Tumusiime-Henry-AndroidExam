@@ -39,6 +39,12 @@
             android:exported="false"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
+        <!-- Screen 2: Book details -->
+        <activity
+            android:name=".BookDetailActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
     </application>
 
 </manifest>
