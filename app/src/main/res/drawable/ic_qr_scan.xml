@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scan icon: four viewfinder corners around a small QR pattern -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@color/lib_navy"
+        android:pathData="M2,2h6v2H4v4H2Z M16,2h6v6h-2V4h-4Z M2,16h2v4h4v2H2Z M20,16h2v6h-6v-2h4Z" />
+    <path
+        android:fillColor="@color/lib_navy"
+        android:pathData="M7,7h4v4H7Z M13,7h4v4h-4Z M7,13h4v4H7Z M13,13h2v2h-2Z M15,15h2v2h-2Z" />
+</vector>

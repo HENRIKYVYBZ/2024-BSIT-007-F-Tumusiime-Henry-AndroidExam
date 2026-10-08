@@ -101,6 +101,12 @@
     <string name="reminder_text">Collect \"%1$s\" at the express counter</string>
     <string name="reminder_big_text">Collect \"%1$s\" today at the library\'s express counter (%2$s). Reservations not collected today expire.</string>
 
+    <!-- QR scanning -->
+    <string name="scan_qr">Scan a book\'s QR code</string>
+    <string name="scan_prompt">Point the camera at the QR label on the book</string>
+    <string name="scan_unknown_title">Not a library label</string>
+    <string name="scan_unknown_message">That QR code is not a USJM library book label. Scan the QR sticker on the book\'s cover.</string>
+
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>

@@ -16,12 +16,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.util.List;
 
@@ -29,6 +32,7 @@ import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
+import ug.ac.usjm.smartlibrary.util.QrPayload;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
 /** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in. */
@@ -38,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
     private BookAdapter adapter;
     private EditText searchBox;
     private TextView resultCount;
+
+    /** Opens the camera scanner and receives the scanned text (ZXing library). */
+    private final ActivityResultLauncher<ScanOptions> qrScanner =
+            registerForActivityResult(new ScanContract(), result -> onQrScanned(result.getContents()));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Scan a book's QR label -> its details screen.
+        findViewById(R.id.btn_scan).setOnClickListener(v -> startQrScan());
+
         // Search as the user types.
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -112,6 +123,33 @@ public class MainActivity extends AppCompatActivity {
             // Not critical: the list still loads.
         }
         loadBooks();
+    }
+
+    private void startQrScan() {
+        ScanOptions options = new ScanOptions()
+                .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                .setPrompt(getString(R.string.scan_prompt))
+                .setBeepEnabled(false)
+                .setOrientationLocked(false);
+        qrScanner.launch(options);   // the scanner asks for camera permission itself
+    }
+
+    /** @param text what the QR code contains, or null if the student cancelled */
+    private void onQrScanned(String text) {
+        if (text == null) return;
+        long id = QrPayload.bookId(text);
+        Book book = id > 0 ? repo.getBook(id) : null;
+        if (book == null) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.scan_unknown_title)
+                    .setMessage(R.string.scan_unknown_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            return;
+        }
+        Intent i = new Intent(this, BookDetailActivity.class);
+        i.putExtra(BookDetailActivity.EXTRA_BOOK_ID, book.id);
+        startActivity(i);
     }
 
     /** Android 13+ asks the user before an app may show notifications; we ask once, on first use. */

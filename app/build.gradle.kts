@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(platform(libs.firebase.bom))   // keeps all Firebase versions compatible
     implementation(libs.firebase.auth)            // sign in, sign up, password reset
+    implementation(libs.zxing.android.embedded)   // QR code scanner (camera)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
