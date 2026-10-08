@@ -2,7 +2,10 @@ package ug.ac.usjm.smartlibrary;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.SQLException;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -23,6 +28,7 @@ import java.util.List;
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
+import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
 /** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in. */
@@ -47,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.greeting)).setText(getString(R.string.greeting, firstName(user)));
         findViewById(R.id.btn_sign_out).setOnClickListener(v -> confirmSignOut());
+
+        PickupReminders.createChannel(this);
+        askForNotificationPermissionOnce();
 
         repo = LibraryRepository.get(this);
         searchBox = (EditText) findViewById(R.id.search_box);
@@ -103,6 +112,17 @@ public class MainActivity extends AppCompatActivity {
             // Not critical: the list still loads.
         }
         loadBooks();
+    }
+
+    /** Android 13+ asks the user before an app may show notifications; we ask once, on first use. */
+    private void askForNotificationPermissionOnce() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        String permission = "android.permission.POST_NOTIFICATIONS";
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) return;
+        SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
+        if (prefs.getBoolean("asked_notifications", false)) return;
+        prefs.edit().putBoolean("asked_notifications", true).apply();
+        ActivityCompat.requestPermissions(this, new String[]{permission}, 1);
     }
 
     /** First name from the saved profile, else the Firebase display name, else the email. */

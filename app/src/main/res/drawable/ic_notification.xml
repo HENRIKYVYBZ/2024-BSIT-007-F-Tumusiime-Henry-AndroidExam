@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small white book for the status bar (notification icons must be single-colour) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M2.5,5.2C5.2,4.1 8.3,4.2 11.2,5.9V19.6C8.4,18.1 5.3,18 2.5,19Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12.8,5.9C15.7,4.2 18.8,4.1 21.5,5.2V19C18.7,18 15.6,18.1 12.8,19.6Z" />
+</vector>

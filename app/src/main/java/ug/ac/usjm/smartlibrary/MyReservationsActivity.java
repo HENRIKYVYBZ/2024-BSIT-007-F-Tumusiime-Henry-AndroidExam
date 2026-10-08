@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.data.Reservation;
+import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
 /** Screen 4 - My Reservations: the signed-in student's reservations, read from SQLite, with Cancel. */
@@ -75,6 +76,7 @@ public class MyReservationsActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             if (repo.cancelReservation(reservation.id)) {
+                                PickupReminders.cancel(MyReservationsActivity.this, reservation.id);
                                 Toast.makeText(MyReservationsActivity.this, R.string.cancelled_toast,
                                         Toast.LENGTH_SHORT).show();
                             }

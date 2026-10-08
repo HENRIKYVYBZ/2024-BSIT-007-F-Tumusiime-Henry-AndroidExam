@@ -23,6 +23,7 @@ import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.data.ReservationException;
+import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.DateText;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
@@ -172,6 +173,8 @@ public class ReserveActivity extends AppCompatActivity {
                     .putString(KEY_NAME, name)
                     .putString(KEY_REG, reg)
                     .apply();
+            // Remind the student on the morning of the pickup day.
+            PickupReminders.schedule(this, id, book.title, book.shelf, pickupDate);
             showSuccess(id);
         } catch (ReservationException e) {
             showProblem(e.getMessage());          // a library rule said no

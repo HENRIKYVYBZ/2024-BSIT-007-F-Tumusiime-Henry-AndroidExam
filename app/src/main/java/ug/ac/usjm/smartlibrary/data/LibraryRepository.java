@@ -181,6 +181,28 @@ public class LibraryRepository {
         return list;
     }
 
+    /**
+     * Active reservations on this phone whose pickup date is today or later (all accounts).
+     * Used to put pickup reminders back after the phone restarts.
+     */
+    public List<Reservation> getActiveReservations(String today) {
+        List<Reservation> list = new ArrayList<>();
+        Cursor c = helper.getReadableDatabase().rawQuery(
+                "SELECT r.id, r.book_id, b.title, b.shelf, r.student_name, r.reg_number, r.pickup_date, "
+                        + "r.status, r.created_at FROM " + LibraryDbHelper.T_RESERVATIONS + " r "
+                        + "JOIN " + LibraryDbHelper.T_BOOKS + " b ON b.id = r.book_id "
+                        + "WHERE r.status = 'ACTIVE' AND r.pickup_date >= ?", new String[]{today});
+        try {
+            while (c.moveToNext()) {
+                list.add(new Reservation(c.getLong(0), c.getLong(1), c.getString(2), c.getString(3),
+                        c.getString(4), c.getString(5), c.getString(6), c.getString(7), c.getLong(8)));
+            }
+        } finally {
+            c.close();
+        }
+        return list;
+    }
+
     /** Cancels an active reservation and returns its copy to the shelf. @return true if cancelled. */
     public boolean cancelReservation(long reservationId) {
         SQLiteDatabase db = helper.getWritableDatabase();
