@@ -46,6 +46,47 @@
                 android:id="@+id/error_text"
                 style="@style/LibErrorBox" />
 
+            <!-- Who is signing up. Librarian and administrator accounts are granted by an administrator. -->
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_i_am" />
+
+            <RadioGroup
+                android:id="@+id/role_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_input"
+                android:orientation="vertical"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp">
+
+                <RadioButton
+                    android:id="@+id/role_student"
+                    style="@style/LibRadio"
+                    android:checked="true"
+                    android:text="@string/role_student" />
+
+                <RadioButton
+                    android:id="@+id/role_teaching"
+                    style="@style/LibRadio"
+                    android:text="@string/role_teaching" />
+
+                <RadioButton
+                    android:id="@+id/role_non_teaching"
+                    style="@style/LibRadio"
+                    android:text="@string/role_non_teaching" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/staff_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/staff_approval_note"
+                android:textColor="@color/lib_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
             <TextView
                 style="@style/LibLabel"
                 android:text="@string/label_name" />
@@ -60,6 +101,7 @@
                 android:maxLength="60" />
 
             <TextView
+                android:id="@+id/label_id"
                 style="@style/LibLabel"
                 android:text="@string/label_reg" />
 

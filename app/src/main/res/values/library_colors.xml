@@ -14,5 +14,7 @@
     <color name="lib_red">#B3261E</color>
     <color name="lib_red_bg">#FBE5E3</color>
     <color name="lib_grey_bg">#ECEEF2</color>
+    <color name="lib_notice">#7A5300</color>
+    <color name="lib_notice_bg">#FFF6DD</color>
     <color name="lib_disabled">#AEB6C3</color>
 </resources>

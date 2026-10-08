@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Firebase Authentication needs the internet -->
+    <!-- Firebase Authentication and Cloud Firestore need the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Pickup reminders: show notifications (Android 13+ asks the user) and restore them after a restart -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -67,6 +67,13 @@
             android:name=".MyReservationsActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+
+        <!-- Administrators: approve accounts and assign roles -->
+        <activity
+            android:name=".AdminActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
 
         <!-- QR scanner screen from the ZXing library: allow portrait as well as landscape -->
         <activity

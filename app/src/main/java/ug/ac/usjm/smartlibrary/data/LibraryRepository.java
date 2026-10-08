@@ -13,11 +13,12 @@ import java.util.List;
  * The only class the screens talk to for data. It hides the SQL and enforces the library rules:
  *  - a book can only be reserved while a copy is available;
  *  - a student (identified by their Firebase account) cannot reserve the same book twice;
- *  - a student can hold at most {@link #MAX_ACTIVE_RESERVATIONS} reservations at a time;
+ *  - a person can hold at most {@code maxActive} reservations at a time (3 for students, more for staff);
  *  - reserving takes one copy off the shelf count; cancelling or expiring puts it back.
  */
 public class LibraryRepository {
 
+    /** Default limit (students); other roles have their own, see Roles.maxActiveReservations. */
     public static final int MAX_ACTIVE_RESERVATIONS = 3;
 
     private static LibraryRepository instance;
@@ -152,11 +153,12 @@ public class LibraryRepository {
      * Reserves a copy of a book. Runs as one database transaction, so either everything is saved
      * or nothing is.
      *
+     * @param maxActive how many active reservations this person's role allows
      * @return the new reservation's id
      * @throws ReservationException when a library rule does not allow the reservation
      */
     public long reserve(long bookId, String studentUid, String studentName, String regNumber,
-                        String pickupDate) throws ReservationException {
+                        String pickupDate, int maxActive) throws ReservationException {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -171,8 +173,8 @@ public class LibraryRepository {
             if (countActive(db, studentUid, bookId) > 0) {
                 throw new ReservationException("You already have an active reservation for this book.");
             }
-            if (countActive(db, studentUid, -1) >= MAX_ACTIVE_RESERVATIONS) {
-                throw new ReservationException("You can hold at most " + MAX_ACTIVE_RESERVATIONS
+            if (countActive(db, studentUid, -1) >= maxActive) {
+                throw new ReservationException("You can hold at most " + maxActive
                         + " reservations at a time. Cancel one in My Reservations first.");
             }
 

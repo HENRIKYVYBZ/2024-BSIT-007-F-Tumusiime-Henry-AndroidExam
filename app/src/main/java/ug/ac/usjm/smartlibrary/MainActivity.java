@@ -33,15 +33,22 @@ import java.util.List;
 import java.util.Locale;
 
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
+import ug.ac.usjm.smartlibrary.auth.Session;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
+import ug.ac.usjm.smartlibrary.data.UserDirectory;
+import ug.ac.usjm.smartlibrary.data.UserProfile;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.sync.CatalogueSync;
 import ug.ac.usjm.smartlibrary.util.ServerAddress;
 import ug.ac.usjm.smartlibrary.util.QrPayload;
+import ug.ac.usjm.smartlibrary.util.Roles;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
-/** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in. */
+/**
+ * Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in.
+ * The header shows the person's role and the extra tools their role allows (e.g. Manage users for administrators).
+ */
 public class MainActivity extends AppCompatActivity {
 
     private LibraryRepository repo;
@@ -49,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchBox;
     private TextView resultCount;
     private TextView syncButton;
+    private TextView greeting;
+    private TextView roleBadge;
+    private TextView accountBanner;
     private boolean syncing = false;
 
     /** Opens the camera scanner and receives the scanned text (ZXing library). */
@@ -67,8 +77,17 @@ public class MainActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_main);
 
-        ((TextView) findViewById(R.id.greeting)).setText(getString(R.string.greeting, firstName(user)));
+        greeting = (TextView) findViewById(R.id.greeting);
+        roleBadge = (TextView) findViewById(R.id.role_badge);
+        accountBanner = (TextView) findViewById(R.id.account_banner);
+        greeting.setText(getString(R.string.greeting, firstName(user)));
         findViewById(R.id.btn_sign_out).setOnClickListener(v -> confirmSignOut());
+        findViewById(R.id.btn_manage_users).setOnClickListener(v ->
+                startActivity(new Intent(this, AdminActivity.class)));
+
+        // Show the role saved on this phone at once, then refresh it from Firestore.
+        showProfile(Session.get(this, user.getUid()));
+        refreshProfile(user);
 
         PickupReminders.createChannel(this);
         askForNotificationPermissionOnce();
@@ -267,6 +286,78 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{permission}, 1);
     }
 
+    /** Loads the profile from Firestore (creating one for accounts made before roles existed). */
+    private void refreshProfile(final FirebaseUser user) {
+        UserDirectory.loadOrCreate(user.getUid(), fallbackProfile(user), new UserDirectory.Result<UserProfile>() {
+            @Override
+            public void onSuccess(UserProfile p) {
+                if (isFinishing()) return;
+                if (p.suspended) {
+                    showSuspended();
+                    return;
+                }
+                Session.set(MainActivity.this, p);
+                showProfile(p);
+            }
+
+            @Override
+            public void onError(String message) {
+                if (isFinishing()) return;
+                // Offline: keep using the saved profile. With none saved, explain why tools are missing.
+                if (Session.get(MainActivity.this, user.getUid()) == null) {
+                    accountBanner.setText(getString(R.string.profile_not_loaded, message));
+                    accountBanner.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    /** The profile to create if this account has none in Firestore yet. */
+    private UserProfile fallbackProfile(FirebaseUser user) {
+        UserProfile cached = Session.get(this, user.getUid());
+        if (cached != null && Roles.canSelfSignUp(cached.role)) {
+            return UserProfile.newAccount(user.getUid(), cached.fullName, user.getEmail(), cached.role, cached.idNumber);
+        }
+        String name = ProfileStore.name(this, user.getUid());
+        if (name == null) name = user.getDisplayName();
+        return UserProfile.newAccount(user.getUid(), name, user.getEmail(), Roles.STUDENT,
+                ProfileStore.regNumber(this, user.getUid()));
+    }
+
+    /** Role badge, approval banner and role tools. @param p null when no profile is known yet */
+    private void showProfile(UserProfile p) {
+        if (p == null) {
+            roleBadge.setVisibility(View.GONE);
+            return;
+        }
+        if (!p.firstName().isEmpty()) greeting.setText(getString(R.string.greeting, p.firstName()));
+        RoleStyle.applyBadge(roleBadge, p.role, p.isWaitingForApproval());
+        roleBadge.setVisibility(View.VISIBLE);
+
+        if (p.isWaitingForApproval()) {
+            accountBanner.setText(getString(R.string.waiting_banner, Roles.label(p.role).toLowerCase(Locale.ENGLISH)));
+            accountBanner.setVisibility(View.VISIBLE);
+        } else {
+            accountBanner.setVisibility(View.GONE);
+        }
+
+        boolean admin = Roles.canManageUsers(p.role, p.approved);
+        findViewById(R.id.btn_manage_users).setVisibility(admin ? View.VISIBLE : View.GONE);
+        findViewById(R.id.role_tools).setVisibility(admin ? View.VISIBLE : View.GONE);
+    }
+
+    /** An administrator suspended this account: sign out and explain. */
+    private void showSuspended() {
+        FirebaseAuth.getInstance().signOut();
+        Session.clear(this);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.suspended_title)
+                .setMessage(R.string.suspended_message)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, (d, w) -> goToLogin())
+                .show();
+    }
+
     /** First name from the saved profile, else the Firebase display name, else the email. */
     private String firstName(FirebaseUser user) {
         String name = ProfileStore.name(this, user.getUid());
@@ -285,6 +376,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.sign_out, (dialog, which) -> {
                     FirebaseAuth.getInstance().signOut();
+                    Session.clear(this);
                     goToLogin();
                 })
                 .show();

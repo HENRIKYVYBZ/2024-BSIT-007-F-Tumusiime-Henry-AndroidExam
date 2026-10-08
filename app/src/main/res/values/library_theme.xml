@@ -113,6 +113,43 @@
         <item name="android:focusable">true</item>
     </style>
 
+    <!-- One option in the "I am a" list on the sign-up screen -->
+    <style name="LibRadio">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textColor">@color/lib_text</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Small gold-on-navy pill used for role tools in the catalogue header -->
+    <style name="LibHeaderPill">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">14dp</item>
+        <item name="android:paddingRight">14dp</item>
+        <item name="android:textColor">@color/lib_gold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Tab on a light background: selected = navy, otherwise white -->
+    <style name="LibTab">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="LibLink">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

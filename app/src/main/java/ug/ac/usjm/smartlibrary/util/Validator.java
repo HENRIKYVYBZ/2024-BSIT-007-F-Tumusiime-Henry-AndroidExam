@@ -25,6 +25,9 @@ public final class Validator {
     /** Letters (any language), spaces, apostrophes, hyphens and full stops, e.g. "Okot p'Bitek". */
     private static final Pattern NAME = Pattern.compile("^[\\p{L}][\\p{L} .'-]*[\\p{L}.]$");
 
+    /** Staff ID, e.g. ST-0123, USJM/LIB/007 or 10457: letters and digits, parts separated by "/" or "-". */
+    private static final Pattern STAFF_ID = Pattern.compile("^[A-Z0-9]{2,10}([/-][A-Z0-9]{1,10}){0,3}$");
+
     private static final Pattern ISO_DATE = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
 
     /** name@domain.tld; deliberately simple, Firebase does the final check. */
@@ -56,6 +59,19 @@ public final class Validator {
         if (r.isEmpty()) return "Enter your registration number";
         if (!REG_NUMBER.matcher(r).matches()) return "Use the format 2023/BIT/0457";
         return null;
+    }
+
+    public static String staffIdError(String staffId) {
+        String s = normaliseRegNumber(staffId);
+        if (s.isEmpty()) return "Enter your staff ID";
+        if (s.length() > 20) return "Staff ID must be 20 characters or fewer";
+        if (!STAFF_ID.matcher(s).matches()) return "Use letters and numbers, e.g. ST-0123";
+        return null;
+    }
+
+    /** Students give a registration number, everyone else a staff ID (see {@link Roles#usesRegNumber}). */
+    public static String idNumberError(String role, String id) {
+        return Roles.usesRegNumber(role) ? regNumberError(id) : staffIdError(id);
     }
 
     // ------------------------------------------------------------- accounts
@@ -90,13 +106,18 @@ public final class Validator {
     // --------------------------------------------------------- reservations
 
     /**
-     * The pickup date must be a real date from today up to {@link #MAX_PICKUP_DAYS_AHEAD} days ahead,
+     * The pickup date must be a real date from today up to {@link #MAX_PICKUP_DAYS_AHEAD} days ahead (students),
      * and not a Sunday (the library is closed).
      *
      * @param pickup the chosen date, yyyy-MM-dd
      * @param today  today's date, yyyy-MM-dd
      */
     public static String pickupDateError(String pickup, String today) {
+        return pickupDateError(pickup, today, MAX_PICKUP_DAYS_AHEAD);
+    }
+
+    /** Same check with a role-specific limit, e.g. 14 days for lecturers ({@link Roles#maxPickupDaysAhead}). */
+    public static String pickupDateError(String pickup, String today, int maxDaysAhead) {
         if (pickup == null || pickup.trim().isEmpty()) return "Choose a pickup date";
         Calendar p = parse(pickup);
         Calendar t = parse(today);
@@ -104,7 +125,7 @@ public final class Validator {
         if (t == null) throw new IllegalArgumentException("today must be yyyy-MM-dd: " + today);
         long days = daysBetween(t, p);
         if (days < 0) return "The pickup date cannot be in the past";
-        if (days > MAX_PICKUP_DAYS_AHEAD) return "Choose a date within " + MAX_PICKUP_DAYS_AHEAD + " days";
+        if (days > maxDaysAhead) return "Choose a date within " + maxDaysAhead + " days";
         if (p.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) return "The library is closed on Sundays";
         return null;
     }

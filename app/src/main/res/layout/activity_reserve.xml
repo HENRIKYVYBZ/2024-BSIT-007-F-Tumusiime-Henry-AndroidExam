@@ -72,6 +72,7 @@
                 android:maxLength="60" />
 
             <TextView
+                android:id="@+id/label_id"
                 style="@style/LibLabel"
                 android:text="@string/label_reg" />
 

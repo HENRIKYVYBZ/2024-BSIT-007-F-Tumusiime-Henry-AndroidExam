@@ -22,16 +22,36 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/greeting"
+            <!-- Greeting + role badge take the space that is left, so Sync and Sign out always fit -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/lib_gold"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/greeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/lib_gold"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Role of the signed-in person, e.g. "Student" or "Librarian" -->
+                <TextView
+                    android:id="@+id/role_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/btn_sync"
@@ -143,6 +163,28 @@
                 android:padding="12dp"
                 android:src="@drawable/ic_qr_scan" />
         </LinearLayout>
+
+        <!-- Extra tools for staff, librarians and administrators (shown by role) -->
+        <HorizontalScrollView
+            android:id="@+id/role_tools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btn_manage_users"
+                    style="@style/LibHeaderPill"
+                    android:text="@string/manage_users"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </HorizontalScrollView>
     </LinearLayout>
 
     <!-- Light body: count + list -->
@@ -152,6 +194,20 @@
         android:layout_weight="1"
         android:background="@color/lib_bg"
         android:orientation="vertical">
+
+        <!-- Staff accounts waiting for an administrator -->
+        <TextView
+            android:id="@+id/account_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/bg_notice_box"
+            android:padding="12dp"
+            android:textColor="@color/lib_notice"
+            android:textSize="13sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/result_count"

@@ -1,0 +1,49 @@
+// Cloud Firestore security rules for USJM Smart Library Mobile.
+// Paste into Firebase console > Firestore Database > Rules, then click Publish.
+// The app hides tools people may not use; these rules make sure the server refuses them too.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function hasProfile() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function active() {
+      return hasProfile() && profile().suspended != true;
+    }
+    function isAdmin() {
+      return active() && profile().role == 'admin';
+    }
+    function isLibrarian() {   // administrators can do everything a librarian can
+      return active() && profile().role in ['librarian', 'admin'];
+    }
+
+    // users/{uid}: one profile per account (name, role, ID number, approval)
+    match /users/{uid} {
+      // You can read your own profile; librarians and administrators can read everyone's.
+      allow read: if signedIn() && (request.auth.uid == uid || isLibrarian());
+
+      // Sign-up: only for yourself, only as student / teaching staff / non-teaching staff.
+      // Students are approved at once; staff must wait for an administrator.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role in ['student', 'teaching_staff', 'non_teaching_staff']
+        && request.resource.data.approved == (request.resource.data.role == 'student')
+        && request.resource.data.suspended == false;
+
+      // Administrators may change anything. Everyone else may edit their own profile
+      // but never their role, approval or suspension.
+      allow update: if isAdmin()
+        || (signedIn() && request.auth.uid == uid
+            && !request.resource.data.diff(resource.data).affectedKeys()
+                 .hasAny(['role', 'approved', 'suspended']));
+
+      allow delete: if false;
+    }
+  }
+}

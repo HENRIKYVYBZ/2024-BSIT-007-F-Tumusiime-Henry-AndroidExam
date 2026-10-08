@@ -1,8 +1,9 @@
 # USJM Smart Library Mobile
 
-An Android app (Java) that lets University of Saint Joseph Mbarara (USJM) students browse the library
-catalogue on their phone, check whether a copy is on the shelf, and reserve it for pickup at an express
-counter, so they spend less time queueing at the main circulation desk.
+An Android app (Java) that lets University of Saint Joseph Mbarara (USJM) students and staff browse the
+library catalogue on their phone, check whether a copy is on the shelf, and reserve it for pickup at an
+express counter, so they spend less time queueing at the main circulation desk. Librarians and
+administrators use the same app for their own work (see User roles).
 
 Course unit: Android Programming (Year 3). Mobile companion to my final-year project, the USJM Smart
 Library Management System.
@@ -12,24 +13,40 @@ Library Management System.
 | Screen | What it does |
 |---|---|
 | Sign in | Email and password (Firebase Authentication), Show/Hide password, links to Forgot password and Create account; skipped when already signed in |
-| Create account | Full name, registration number, email, password and confirmation, all validated; sends a verification email |
+| Create account | I am a student / teaching staff / non-teaching staff, full name, registration number or staff ID, email, password and confirmation, all validated; sends a verification email |
 | Reset password | Sends a password-reset link to the student's email |
 | Catalogue | Greets the signed-in student; lists every book from the phone's SQLite database; live search by title, author or subject; shows how many copies are available |
 | Book details | Shelf location, subject, year, description and availability; Reserve button (disabled when no copies are left) |
 | Reserve | Form with full name, registration number and pickup date (calendar); validates every field; saves the reservation to SQLite in one transaction |
 | My reservations | Lists reservations (Active / Cancelled / Expired); cancel with confirmation, which puts the copy back on the shelf |
+| Manage users (administrators) | Approve staff accounts, reject a staff request, change anyone's role (e.g. make a librarian), suspend or restore an account; search by name, email or ID |
+
+## User roles
+
+| Role | How you get it | Reservations at a time | Book ahead |
+|---|---|---|---|
+| Student | Choose it when signing up (approved at once) | 3 | 7 days |
+| Teaching staff | Choose it when signing up, then an administrator approves | 10 | 14 days |
+| Non-teaching staff | Choose it when signing up, then an administrator approves | 5 | 7 days |
+| Librarian | Given by an administrator | 5 | 14 days |
+| Administrator | Given by another administrator (the first one is set in the Firebase console) | 5 | 14 days |
+
+Staff waiting for approval can use the app with student limits. Roles are stored in Cloud Firestore
+(`users/{uid}`) and protected by `firestore.rules`: nobody can give themselves a role, approve
+themselves or lift their own suspension, even with a modified app.
 
 Library rules enforced by the app:
 - a book can be reserved only while a copy is available;
 - a student cannot reserve the same book twice;
-- at most 3 active reservations per registration number;
-- the pickup date must be from today up to 7 days ahead, and not a Sunday;
+- at most 3 active reservations for a student (more for staff, see User roles);
+- the pickup date must be from today up to 7 days ahead (14 for lecturers), and not a Sunday;
 - reservations not collected by their pickup date expire automatically and the copy returns to the shelf.
 
 ## Technology
 
 - Java, Android SDK (min SDK 24), AppCompat
 - Firebase Authentication (email and password accounts, password-reset email)
+- Cloud Firestore (user profiles and roles), protected by security rules in `firestore.rules`
 - SQLite through `SQLiteOpenHelper` (tables `books` and `reservations`)
 - `SharedPreferences` to remember the student's name and registration number
 - JUnit 4 unit tests for the form validation rules (20 tests)
@@ -58,9 +75,14 @@ docs/                          diagrams, wireframes and report
 1. Firebase: create a project at console.firebase.google.com, add an Android app with package
    `ug.ac.usjm.smartlibrary`, download `google-services.json` into the `app/` folder, and enable
    **Authentication → Email/Password**. (The file is not in this repository on purpose.)
-2. Open the project in Android Studio and wait for Gradle sync to finish.
-3. Start an emulator (Device Manager) or connect an Android phone with USB debugging on.
-4. Press **Run ▶**, then create an account on the Sign in screen.
+2. Cloud Firestore: in the Firebase console open **Firestore Database → Create database**, then open
+   the **Rules** tab, paste the contents of `firestore.rules` and click **Publish**.
+3. First administrator: create an account in the app, then in **Firestore Database → Data → users**
+   open your document and set `role` to `admin` and `approved` to `true`. From then on, administrators
+   manage everyone else from the app.
+4. Open the project in Android Studio and wait for Gradle sync to finish.
+5. Start an emulator (Device Manager) or connect an Android phone with USB debugging on.
+6. Press **Run ▶**, then create an account on the Sign in screen.
 
 Run the unit tests: right-click `app/src/test/java/ug.ac.usjm.smartlibrary/util/ValidatorTest` → **Run**.
 
