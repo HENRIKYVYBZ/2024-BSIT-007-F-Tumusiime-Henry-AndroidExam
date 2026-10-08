@@ -42,6 +42,7 @@ public class ValidatorTest {
     public void validRegNumbersAreAccepted() {
         assertNull(Validator.regNumberError("2023/BIT/0457"));
         assertNull(Validator.regNumberError("USJM/23/BIT/045"));
+        assertNull(Validator.regNumberError("2024-BSIT-007-F"));
         assertNull(Validator.regNumberError(" 2023/bit/0457 "));   // trimmed and upper-cased
     }
 

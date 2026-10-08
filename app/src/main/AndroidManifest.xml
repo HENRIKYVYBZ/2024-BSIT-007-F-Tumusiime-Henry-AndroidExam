@@ -45,6 +45,18 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- Screen 3: Reserve form -->
+        <activity
+            android:name=".ReserveActivity"
+            android:exported="false"
+            android:parentActivityName=".BookDetailActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <!-- Screen 4: My reservations -->
+        <activity
+            android:name=".MyReservationsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>

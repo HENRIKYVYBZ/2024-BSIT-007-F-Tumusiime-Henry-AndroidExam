@@ -10,12 +10,13 @@ import android.database.sqlite.SQLiteOpenHelper;
  *
  * Tables:
  *   books        - the catalogue, with total and available copies
- *   reservations - books reserved by students for pickup at the library desk
+ *   reservations - books reserved by students for pickup at the library desk (one row per reservation)
  */
 public class LibraryDbHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "smartlibrary.db";
-    public static final int DB_VERSION = 1;
+    // Version 2 links each reservation to the signed-in student's Firebase account (student_uid).
+    public static final int DB_VERSION = 2;
 
     public static final String T_BOOKS = "books";
     public static final String T_RESERVATIONS = "reservations";
@@ -45,6 +46,7 @@ public class LibraryDbHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + T_RESERVATIONS + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "book_id INTEGER NOT NULL REFERENCES " + T_BOOKS + "(id), "
+                + "student_uid TEXT NOT NULL, "   // Firebase user id of the student
                 + "student_name TEXT NOT NULL, "
                 + "reg_number TEXT NOT NULL, "
                 + "pickup_date TEXT NOT NULL, "   // yyyy-MM-dd

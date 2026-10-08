@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen 3: Reserve form -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            style="@style/LibBackButton" />
+
+        <TextView
+            style="@style/LibHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text="@string/reserve_title" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/lib_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Which book -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/reserve_book_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/lib_text"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/reserve_book_shelf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/lib_muted"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_name" />
+
+            <EditText
+                android:id="@+id/input_name"
+                style="@style/LibInput"
+                android:hint="@string/hint_name"
+                android:imeOptions="actionNext"
+                android:inputType="textPersonName|textCapWords"
+                android:maxLength="60" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_reg" />
+
+            <EditText
+                android:id="@+id/input_reg"
+                style="@style/LibInput"
+                android:hint="@string/hint_reg"
+                android:imeOptions="actionDone"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:maxLength="20" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_pickup" />
+
+            <!-- Looks like an input; tapping it opens a calendar (DatePickerDialog) -->
+            <TextView
+                android:id="@+id/input_pickup"
+                style="@style/LibInput"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:hint="@string/hint_pickup" />
+
+            <Button
+                android:id="@+id/btn_confirm"
+                style="@style/LibPrimaryButton"
+                android:layout_marginTop="28dp"
+                android:text="@string/confirm_reservation" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -23,6 +23,7 @@ import java.util.List;
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
+import ug.ac.usjm.smartlibrary.util.Validator;
 
 /** Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in. */
 public class MainActivity extends AppCompatActivity {
@@ -66,6 +67,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Navigation: header button -> My Reservations screen.
+        findViewById(R.id.btn_my_reservations).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MyReservationsActivity.class));
+            }
+        });
+
         // Search as the user types.
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,7 +96,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (adapter == null) return;   // redirected to the sign-in screen
-        // Runs on first open and every time the user comes back, so the list is always current.
+        // Runs on first open and every time the user comes back, so copy counts are always current.
+        try {
+            repo.expireUncollected(Validator.today());
+        } catch (SQLException e) {
+            // Not critical: the list still loads.
+        }
         loadBooks();
     }
 

@@ -16,11 +16,11 @@ public final class Validator {
     public static final int MAX_PICKUP_DAYS_AHEAD = 7;
 
     /**
-     * Registration number format, e.g. 2023/BIT/0457 or USJM/23/BIT/045.
-     * Change this pattern if your university's format is different.
+     * Registration number format, e.g. 2023/BIT/0457, 2024-BSIT-007-F or USJM/23/BIT/045
+     * (parts separated by "/" or "-"). Change this pattern if your university's format is different.
      */
     private static final Pattern REG_NUMBER =
-            Pattern.compile("^([A-Z]{2,6}/)?\\d{2,4}/[A-Z]{1,6}/\\d{1,6}(/[A-Z]{1,3})?$");
+            Pattern.compile("^([A-Z]{2,6}[/-])?\\d{2,4}[/-][A-Z]{1,6}[/-]\\d{1,6}([/-][A-Z]{1,3})?$");
 
     /** Letters (any language), spaces, apostrophes, hyphens and full stops, e.g. "Okot p'Bitek". */
     private static final Pattern NAME = Pattern.compile("^[\\p{L}][\\p{L} .'-]*[\\p{L}.]$");

@@ -1,5 +1,6 @@
 package ug.ac.usjm.smartlibrary;
 
+import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.view.View;
@@ -36,9 +37,9 @@ public class BookDetailActivity extends AppCompatActivity {
         findViewById(R.id.btn_reserve).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // The reservation form is added in milestone 3.
-                Toast.makeText(BookDetailActivity.this, "Reservations are coming in the next version",
-                        Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(BookDetailActivity.this, ReserveActivity.class);
+                i.putExtra(EXTRA_BOOK_ID, bookId);
+                startActivity(i);
             }
         });
     }
