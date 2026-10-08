@@ -1,0 +1,39 @@
+@startuml
+!include common.iuml
+left to right direction
+title Use case diagram - USJM Smart Library Mobile
+actor "Student" as S
+actor "Firebase\nAuthentication" as F
+actor "Device clock\n(time)" as T
+rectangle "USJM Smart Library Mobile (Android app)" {
+  usecase "Sign up\n(create account)" as A1
+  usecase "Sign in" as A2
+  usecase "Reset password\nby email" as A3
+  usecase "Sign out" as A4
+  usecase "Browse catalogue" as UC1
+  usecase "Search books by title,\nauthor or subject" as UC2
+  usecase "View book details\n& shelf location" as UC3
+  usecase "Reserve book\nfor pickup" as UC4
+  usecase "Validate student\ndetails & pickup date" as UC5
+  usecase "View my reservations" as UC7
+  usecase "Cancel reservation" as UC8
+  usecase "Expire uncollected\nreservations" as UC9
+}
+S --> A1
+S --> A2
+S --> A3
+S --> A4
+S --> UC1
+S --> UC3
+S --> UC4
+S --> UC7
+A1 --> F
+A2 --> F
+A3 --> F
+A3 .> A2 : <<extend>>
+UC2 .> UC1 : <<extend>>
+UC4 .> UC5 : <<include>>
+UC8 .> UC7 : <<extend>>
+T --> UC9
+note bottom of UC1 : All catalogue and reservation\nuse cases require the student\nto be signed in.
+@enduml

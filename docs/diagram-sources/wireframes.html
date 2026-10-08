@@ -1,0 +1,90 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DejaVu Sans",Arial,sans-serif;background:#fff;color:#333;padding:28px 30px 20px;width:1475px}
+h1{font-size:22px;color:#0B2545;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:#777;margin-bottom:22px}
+.row{display:flex;align-items:flex-start;gap:0}
+.col{display:flex;flex-direction:column;align-items:center}
+.cap{font-size:14px;font-weight:700;color:#0B2545;margin-bottom:8px}
+.phone{width:300px;height:600px;border:3px solid #444;border-radius:30px;padding:12px 10px;background:#fafafa;position:relative}
+.scr{height:100%;border:1.5px solid #999;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.sb{height:14px;background:#bbb}
+.hdr{background:#d4d4d4;padding:10px;border-bottom:1.5px solid #999}
+.t{font-weight:700;font-size:14px;color:#222}
+.s{font-size:10px;color:#555;margin-top:2px}
+.box{border:1.5px dashed #888;border-radius:6px;background:#fff;font-size:11px;color:#777;padding:8px}
+.btn{border:2px solid #555;background:#9a9a9a;color:#fff;border-radius:7px;text-align:center;font-weight:700;font-size:12px;padding:10px}
+.pill{border:1.5px solid #555;border-radius:12px;font-size:9px;padding:3px 7px;background:#eee}
+.card{border:1.5px solid #999;border-radius:7px;padding:7px;margin:6px 8px 0;background:#fff}
+.l{height:8px;background:#999;border-radius:3px;margin:3px 0}
+.l2{height:6px;background:#cfcfcf;border-radius:3px;margin:3px 0}
+.badge{display:inline-block;border:1.5px solid #777;border-radius:8px;font-size:8px;padding:1px 6px;background:#eee}
+.lbl{font-size:9px;color:#555;font-weight:700;margin:9px 0 3px}
+.inp{border:1.5px solid #888;border-radius:5px;height:30px;font-size:10px;color:#999;padding:8px}
+.body{flex:1;padding:8px;background:#f2f2f2;overflow:hidden}
+.arrow{width:70px;align-self:center;display:flex;flex-direction:column;align-items:center;margin-top:30px}
+.arrow span{font-size:10px;color:#0B2545;text-align:center;margin-bottom:4px}
+.arrow svg{display:block}
+.note{font-size:11px;color:#444;width:300px;margin-top:10px;line-height:1.45}
+.num{display:inline-block;width:16px;height:16px;border-radius:50%;background:#E0A526;color:#0B2545;font-size:10px;font-weight:700;text-align:center;line-height:16px;margin-right:3px}
+</style></head><body>
+<h1>Wireframes - USJM Smart Library Mobile</h1>
+<div class="sub">Low-fidelity layouts of the four core screens and the navigation between them</div>
+<div class="row">
+
+<div class="col"><div class="cap">1. Catalogue (MainActivity)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="t">USJM Smart Library</div><div class="s">Find a book, reserve it, skip the queue</div></div><span class="pill"><span class="num">a</span>My reservations</span></div>
+ <div class="inp" style="margin-top:8px;background:#fff"><span class="num">b</span>Search title, author or subject</div></div>
+ <div class="body" style="padding:0"><div style="font-size:9px;color:#666;padding:6px 10px 0">15 books</div>
+ <div class="card"><div class="l" style="width:80%"></div><div class="l2" style="width:60%"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><div class="l2" style="width:45%"></div><span class="badge">2 of 3 available</span></div></div>
+ <div class="card"><div class="l" style="width:65%"></div><div class="l2" style="width:50%"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><div class="l2" style="width:40%"></div><span class="badge">All copies out</span></div></div>
+ <div class="card"><div class="l" style="width:75%"></div><div class="l2" style="width:55%"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><div class="l2" style="width:50%"></div><span class="badge">4 of 4 available</span></div></div>
+ <div class="card"><div class="l" style="width:58%"></div><div class="l2" style="width:66%"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><div class="l2" style="width:42%"></div><span class="badge">1 of 2 available</span></div></div>
+ <div class="card"><div class="l" style="width:70%"></div><div class="l2" style="width:48%"></div></div>
+ </div></div></div>
+<div class="note"><span class="num">a</span>opens My reservations &nbsp; <span class="num">b</span>filters the list while typing. Each card: title, author, subject + shelf, availability badge. Tap a card to open its details.</div></div>
+
+<div class="arrow"><span>tap a book</span><svg width="60" height="16"><line x1="0" y1="8" x2="50" y2="8" stroke="#0B2545" stroke-width="2"/><polygon points="50,2 60,8 50,14" fill="#0B2545"/></svg></div>
+
+<div class="col"><div class="cap">2. Book details (BookDetailActivity)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; Book details</div></div>
+ <div class="body"><div class="box" style="border-style:solid;background:#fff;color:#333">
+  <div class="l" style="width:85%;height:11px"></div><div class="l" style="width:55%;height:11px"></div><div class="l2" style="width:60%;margin-top:6px"></div>
+  <span class="badge" style="margin-top:8px">2 of 3 available</span>
+  <div class="lbl">WHERE TO FIND IT</div><div class="l2" style="width:50%"></div>
+  <div style="display:flex;gap:20px"><div style="flex:1"><div class="lbl">SUBJECT</div><div class="l2" style="width:80%"></div></div><div><div class="lbl">YEAR</div><div class="l2" style="width:30px"></div></div></div>
+  <div class="lbl">ABOUT THIS BOOK</div><div class="l2"></div><div class="l2"></div><div class="l2" style="width:70%"></div></div>
+  <div class="btn" style="margin-top:14px"><span class="num">c</span>Reserve for pickup</div>
+  <div style="font-size:9px;color:#777;text-align:center;margin-top:8px">Reserved books wait at the express counter...</div>
+ </div></div></div>
+<div class="note"><span class="num">c</span>disabled and reads "No copies available" when every copy is out. &larr; returns to the catalogue.</div></div>
+
+<div class="arrow"><span>Reserve</span><svg width="60" height="16"><line x1="0" y1="8" x2="50" y2="8" stroke="#0B2545" stroke-width="2"/><polygon points="50,2 60,8 50,14" fill="#0B2545"/></svg></div>
+
+<div class="col"><div class="cap">3. Reserve (ReserveActivity)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; Reserve a book</div></div>
+ <div class="body"><div class="box" style="border-style:solid;background:#fff"><div class="l" style="width:80%"></div><div class="l2" style="width:45%"></div></div>
+  <div class="lbl">FULL NAME</div><div class="inp" style="background:#fff">e.g. Henry Tumusiime</div>
+  <div class="lbl">REGISTRATION NUMBER</div><div class="inp" style="background:#fff;border-color:#c33">2023/BIT/04 <span style="float:right;color:#c33;font-weight:700">(!)</span></div>
+  <div style="font-size:8px;color:#c33;margin-top:2px">Use the format 2023/BIT/0457</div>
+  <div class="lbl">PICKUP DATE</div><div class="inp" style="background:#fff"><span class="num">d</span>Tap to choose (within 7 days)</div>
+  <div class="btn" style="margin-top:22px"><span class="num">e</span>Confirm reservation</div>
+ </div></div></div>
+<div class="note"><span class="num">d</span>opens a calendar (today to +7 days) &nbsp; <span class="num">e</span>validates every field; errors show beside the field. On success a dialog confirms the date, shelf and reservation number.</div></div>
+
+<div class="arrow"><span>later, via<br>(a) on screen 1</span><svg width="60" height="16"><line x1="0" y1="8" x2="50" y2="8" stroke="#0B2545" stroke-width="2"/><polygon points="50,2 60,8 50,14" fill="#0B2545"/></svg></div>
+
+<div class="col"><div class="cap">4. My reservations</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; My reservations</div></div>
+ <div class="body" style="padding:0">
+ <div class="card"><div style="display:flex;justify-content:space-between"><div class="l" style="width:62%"></div><span class="badge">Active</span></div><div class="l2" style="width:80%"></div><div class="l2" style="width:60%"></div><div style="text-align:right;margin-top:5px"><span class="pill" style="font-size:9px;padding:4px 12px"><span class="num">f</span>Cancel</span></div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between"><div class="l" style="width:55%"></div><span class="badge">Active</span></div><div class="l2" style="width:75%"></div><div class="l2" style="width:55%"></div><div style="text-align:right;margin-top:5px"><span class="pill" style="font-size:9px;padding:4px 12px">Cancel</span></div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between"><div class="l" style="width:66%"></div><span class="badge">Expired</span></div><div class="l2" style="width:70%"></div><div class="l2" style="width:58%"></div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between"><div class="l" style="width:50%"></div><span class="badge">Cancelled</span></div><div class="l2" style="width:72%"></div><div class="l2" style="width:52%"></div></div>
+ </div></div></div>
+<div class="note">Card: title, status, pickup date + shelf, name, reg. no. and reservation number. <span class="num">f</span>asks "Cancel reservation?" then returns the copy to the shelf. Empty state explains how to reserve.</div></div>
+</div></body></html>

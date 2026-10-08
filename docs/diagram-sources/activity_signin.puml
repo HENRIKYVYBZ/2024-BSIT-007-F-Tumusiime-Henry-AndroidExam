@@ -1,0 +1,35 @@
+@startuml
+!include common.iuml
+title Activity diagram - Sign in, sign up and reset password
+start
+:Student opens the app;
+if (Already signed in on this phone?) then (yes)
+else (no)
+  :Show Sign in screen;
+  if (Student has an account?) then (no)
+    :Tap "Create an account";
+    repeat
+      :Enter full name, reg. number,\nemail, password and confirm password;
+      :Tap "Create account";
+    repeat while (All fields valid?) is (no: show error\nnext to each field)
+    ->yes;
+    :Firebase creates the account;
+    :Save name & reg. number on the phone;\nsend verification email;
+  else (yes)
+    if (Remembers password?) then (no)
+      :Tap "Forgot password?" and enter email;
+      :Firebase emails a reset link;
+      :Student opens the link and\nchooses a new password;
+    else (yes)
+    endif
+    repeat
+      :Enter email and password;
+      :Tap "Sign in";
+      :Firebase checks the credentials;
+    repeat while (Correct?) is (no: "Incorrect email\nor password")
+    ->yes;
+  endif
+endif
+:Open Catalogue ("Hi, <name>");
+stop
+@enduml

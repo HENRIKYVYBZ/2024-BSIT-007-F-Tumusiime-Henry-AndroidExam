@@ -1,0 +1,45 @@
+@startuml
+!include common.iuml
+title Activity diagram - Reserve a book
+|Student|
+start
+:Open app (Catalogue screen);
+:Search or scroll the list;
+:Tap a book;
+|App|
+:Load book from SQLite;
+:Show details, shelf and copies available;
+if (Copies available?) then (no)
+  :Disable Reserve button\n"No copies available";
+  stop
+else (yes)
+endif
+|Student|
+:Tap "Reserve for pickup";
+|App|
+:Show form, pre-filled with\nsaved name and reg. number;
+|Student|
+repeat
+  :Enter full name and registration number;
+  :Pick pickup date on calendar;
+  :Tap "Confirm reservation";
+  |App|
+  :Validate name, reg. number, date;
+repeat while (All fields valid?) is (no: show error\nnext to the field)
+->yes;
+:Begin SQLite transaction;
+if (Library rules OK?\n(copy free, not a duplicate,\nfewer than 3 active)) then (yes)
+  :available_copies - 1;
+  :INSERT reservation (ACTIVE);
+  :Commit; save name & reg. number;
+  :Show "Book reserved" with\npickup date, shelf and number;
+  |Student|
+  :Collect book at express counter;
+  stop
+else (no)
+  |App|
+  :Roll back;
+  :Show reason, e.g. "You already\nhave this book reserved";
+  stop
+endif
+@enduml

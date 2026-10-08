@@ -1,0 +1,34 @@
+@startuml
+!include common.iuml
+skinparam ClassBackgroundColor #EEF2F8
+skinparam ClassBorderColor #0B2545
+skinparam ClassHeaderBackgroundColor #0B2545
+skinparam ClassFontColor #FFFFFF
+hide circle
+hide methods
+title Database design - smartlibrary.db (SQLite)
+left to right direction
+entity "books" as B {
+  * id : INTEGER <<PK>>
+  --
+  title : TEXT
+  author : TEXT
+  category : TEXT
+  shelf : TEXT
+  year : INTEGER
+  description : TEXT
+  total_copies : INTEGER >= 0
+  available_copies : INTEGER >= 0
+}
+entity "reservations" as R {
+  * id : INTEGER <<PK>>
+  --
+  book_id : INTEGER <<FK>>
+  student_name : TEXT
+  reg_number : TEXT
+  pickup_date : TEXT (yyyy-MM-dd)
+  status : ACTIVE | CANCELLED | EXPIRED
+  created_at : INTEGER (ms)
+}
+B ||--o{ R : "is reserved in"
+@enduml

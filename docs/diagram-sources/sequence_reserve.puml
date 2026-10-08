@@ -1,0 +1,38 @@
+@startuml
+!include common.iuml
+title Sequence diagram - Reserve a book
+actor Student
+participant "ReserveActivity\n(screen 3)" as UI
+participant "Validator" as V
+participant "LibraryRepository" as R
+database "SQLite\nsmartlibrary.db" as DB
+Student -> UI : fill name, reg. no., pickup date\ntap "Confirm reservation"
+activate UI
+UI -> V : nameError(), regNumberError(),\npickupDateError(date, today)
+activate V
+V --> UI : null (valid) or error message
+deactivate V
+alt a field is invalid
+  UI --> Student : show error on the field (setError)
+else all fields valid
+  UI -> R : reserve(bookId, name, regNo, date)
+  activate R
+  R -> DB : BEGIN TRANSACTION
+  R -> DB : SELECT book; COUNT active reservations
+  DB --> R : book, counts
+  alt library rule broken
+    R -> DB : ROLLBACK
+    R --> UI : ReservationException(reason)
+    UI --> Student : dialog "Could not reserve" + reason
+  else rules satisfied
+    R -> DB : UPDATE books SET available_copies - 1
+    R -> DB : INSERT INTO reservations (ACTIVE)
+    R -> DB : COMMIT
+    R --> UI : reservation id
+    deactivate R
+    UI -> UI : save name & reg. no.\n(SharedPreferences)
+    UI --> Student : dialog "Book reserved"\n(date, shelf, number)
+  end
+end
+deactivate UI
+@enduml
