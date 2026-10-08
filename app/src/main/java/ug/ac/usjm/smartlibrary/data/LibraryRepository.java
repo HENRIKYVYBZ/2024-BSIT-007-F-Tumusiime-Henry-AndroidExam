@@ -60,6 +60,64 @@ public class LibraryRepository {
         return books;
     }
 
+    /**
+     * Saves the catalogue downloaded from the library web system (book ids are the server's ids).
+     * Available copies = the server's count minus the copies reserved on this phone.
+     * Books the server no longer lists are removed unless a reservation still refers to them.
+     *
+     * @param removeSampleData true on the first sync: the built-in sample books and their
+     *                         reservations are cleared first
+     * @return how many books were saved
+     */
+    public int replaceCatalogue(List<Book> serverBooks, boolean removeSampleData) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            if (removeSampleData) {
+                db.delete(LibraryDbHelper.T_RESERVATIONS, null, null);
+                db.delete(LibraryDbHelper.T_BOOKS, null, null);
+            }
+            StringBuilder keep = new StringBuilder();
+            for (Book b : serverBooks) {
+                int reservedHere = countActiveForBook(db, b.id);
+                ContentValues v = new ContentValues();
+                v.put("title", b.title);
+                v.put("author", b.author);
+                v.put("category", b.category);
+                v.put("shelf", b.shelf);
+                v.put("year", b.year);
+                v.put("description", b.description);
+                v.put("total_copies", Math.max(0, b.totalCopies));
+                v.put("available_copies", Math.max(0, b.availableCopies - reservedHere));
+                int updated = db.update(LibraryDbHelper.T_BOOKS, v, "id = ?", new String[]{String.valueOf(b.id)});
+                if (updated == 0) {
+                    v.put("id", b.id);
+                    db.insertOrThrow(LibraryDbHelper.T_BOOKS, null, v);
+                }
+                if (keep.length() > 0) keep.append(',');
+                keep.append(b.id);
+            }
+            if (keep.length() > 0) {
+                db.execSQL("DELETE FROM " + LibraryDbHelper.T_BOOKS + " WHERE id NOT IN (" + keep
+                        + ") AND id NOT IN (SELECT book_id FROM " + LibraryDbHelper.T_RESERVATIONS + ")");
+            }
+            db.setTransactionSuccessful();
+            return serverBooks.size();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    private int countActiveForBook(SQLiteDatabase db, long bookId) {
+        Cursor c = db.rawQuery("SELECT COUNT(*) FROM " + LibraryDbHelper.T_RESERVATIONS
+                + " WHERE book_id = ? AND status = ?", new String[]{String.valueOf(bookId), Reservation.ACTIVE});
+        try {
+            return c.moveToFirst() ? c.getInt(0) : 0;
+        } finally {
+            c.close();
+        }
+    }
+
     /** The book with this id, or null if there is none. */
     public Book getBook(long id) {
         return getBook(helper.getReadableDatabase(), id);

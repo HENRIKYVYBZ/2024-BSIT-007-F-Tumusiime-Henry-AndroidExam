@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
+import android.text.InputType;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,12 +27,17 @@ import com.google.firebase.auth.FirebaseUser;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
+import ug.ac.usjm.smartlibrary.sync.CatalogueSync;
+import ug.ac.usjm.smartlibrary.util.ServerAddress;
 import ug.ac.usjm.smartlibrary.util.QrPayload;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
@@ -42,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private BookAdapter adapter;
     private EditText searchBox;
     private TextView resultCount;
+    private TextView syncButton;
+    private boolean syncing = false;
 
     /** Opens the camera scanner and receives the scanned text (ZXing library). */
     private final ActivityResultLauncher<ScanOptions> qrScanner =
@@ -92,6 +100,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Sync the catalogue with the library web system (long-press to change the server).
+        syncButton = (TextView) findViewById(R.id.btn_sync);
+        syncButton.setOnClickListener(v -> onSyncTapped());
+        syncButton.setOnLongClickListener(v -> {
+            askForServer();
+            return true;
+        });
+        if (CatalogueSync.server(this) != null && CatalogueSync.hasServerCatalogue(this)) {
+            sync(false);   // quietly refresh copy counts on every launch
+        }
+
         // Scan a book's QR label -> its details screen.
         findViewById(R.id.btn_scan).setOnClickListener(v -> startQrScan());
 
@@ -123,6 +142,91 @@ public class MainActivity extends AppCompatActivity {
             // Not critical: the list still loads.
         }
         loadBooks();
+    }
+
+    private void onSyncTapped() {
+        if (CatalogueSync.server(this) == null) {
+            askForServer();
+        } else if (!CatalogueSync.hasServerCatalogue(this)) {
+            confirmFirstSync();
+        } else {
+            sync(true);
+        }
+    }
+
+    /** Dialog to type the library server's address, e.g. 192.168.1.10:8000. */
+    private void askForServer() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        input.setHint(R.string.server_hint);
+        String saved = CatalogueSync.server(this);
+        if (saved != null) input.setText(saved.replaceFirst("^http://", ""));
+        int pad = (int) (20 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout box = new android.widget.FrameLayout(this);
+        box.setPadding(pad, pad / 2, pad, 0);
+        box.addView(input);
+
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.server_title)
+                .setMessage(R.string.server_message)
+                .setView(box)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.save_and_sync, null)
+                .create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String base = ServerAddress.normalise(input.getText().toString());
+            if (base == null) {
+                input.setError(getString(R.string.server_invalid));
+                return;
+            }
+            CatalogueSync.setServer(this, base);
+            dialog.dismiss();
+            onSyncTapped();
+        }));
+        dialog.show();
+    }
+
+    /** The first sync replaces the sample books, so the student confirms it once. */
+    private void confirmFirstSync() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.first_sync_title)
+                .setMessage(R.string.first_sync_message)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.sync_now, (d, w) -> sync(true))
+                .show();
+    }
+
+    /** @param loud true when the student tapped Sync: show the outcome; false for the quiet launch refresh */
+    private void sync(final boolean loud) {
+        if (syncing) return;
+        syncing = true;
+        syncButton.setText(R.string.syncing);
+        CatalogueSync.run(this, new CatalogueSync.Callback() {
+            @Override
+            public void onSynced(int bookCount) {
+                syncing = false;
+                syncButton.setText(R.string.sync);
+                loadBooks();
+                if (loud) {
+                    Toast.makeText(MainActivity.this, getString(R.string.sync_done, bookCount),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailed(String message) {
+                syncing = false;
+                syncButton.setText(R.string.sync);
+                if (loud) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.sync_failed_title)
+                            .setMessage(message + "\n\n" + getString(R.string.sync_offline_note))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .setNeutralButton(R.string.change_server, (d, w) -> askForServer())
+                            .show();
+                }
+            }
+        });
     }
 
     private void startQrScan() {
@@ -197,7 +301,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             List<Book> books = repo.getBooks(searchBox.getText().toString());
             adapter.setBooks(books);
-            resultCount.setText(getResources().getQuantityString(R.plurals.books_found, books.size(), books.size()));
+            String count = getResources().getQuantityString(R.plurals.books_found, books.size(), books.size());
+            long last = CatalogueSync.lastSync(this);
+            resultCount.setText(last == 0 ? count : getString(R.string.count_with_sync, count,
+                    new SimpleDateFormat("d MMM, HH:mm", Locale.ENGLISH).format(new Date(last))));
         } catch (SQLException e) {
             Toast.makeText(this, R.string.error_loading, Toast.LENGTH_LONG).show();
         }

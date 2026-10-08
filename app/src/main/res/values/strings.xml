@@ -107,6 +107,23 @@
     <string name="scan_unknown_title">Not a library label</string>
     <string name="scan_unknown_message">That QR code is not a USJM library book label. Scan the QR sticker on the book\'s cover.</string>
 
+    <!-- Sync with the library web system -->
+    <string name="sync">Sync</string>
+    <string name="syncing">Syncing…</string>
+    <string name="sync_now">Sync now</string>
+    <string name="server_title">Library server</string>
+    <string name="server_message">Type the address of the USJM Smart Library web system, e.g. the laptop running it on this Wi-Fi.</string>
+    <string name="server_hint">e.g. 192.168.1.10:8000</string>
+    <string name="server_invalid">Use an address like 192.168.1.10:8000</string>
+    <string name="save_and_sync">Save and sync</string>
+    <string name="change_server">Change server</string>
+    <string name="first_sync_title">Use the library\'s catalogue?</string>
+    <string name="first_sync_message">The sample books on this phone will be replaced by the library server\'s catalogue. Reservations made on the sample books will be removed.</string>
+    <string name="sync_done">Catalogue updated: %1$d books</string>
+    <string name="sync_failed_title">Sync failed</string>
+    <string name="sync_offline_note">You can keep using the copy of the catalogue saved on this phone.</string>
+    <string name="count_with_sync">%1$s  •  synced %2$s</string>
+
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>
