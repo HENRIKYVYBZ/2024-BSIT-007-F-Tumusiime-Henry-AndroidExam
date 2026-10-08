@@ -11,7 +11,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
-import android.text.InputType;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,26 +23,23 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.auth.Session;
 import ug.ac.usjm.smartlibrary.data.Book;
+import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.data.UserDirectory;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
-import ug.ac.usjm.smartlibrary.sync.CatalogueSync;
-import ug.ac.usjm.smartlibrary.util.ServerAddress;
 import ug.ac.usjm.smartlibrary.util.QrPayload;
 import ug.ac.usjm.smartlibrary.util.Roles;
-import ug.ac.usjm.smartlibrary.util.Validator;
 
 /**
  * Screen 1 - Catalogue: every book from the phone's SQLite database, with live search. Requires sign-in.
@@ -55,11 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private BookAdapter adapter;
     private EditText searchBox;
     private TextView resultCount;
-    private TextView syncButton;
     private TextView greeting;
     private TextView roleBadge;
     private TextView accountBanner;
-    private boolean syncing = false;
+    private ListenerRegistration catalogueListener;
+    private boolean sharedCatalogue = false;
+    /** Librarians are taken to the desk once per app launch. */
+    private static boolean deskOpenedThisLaunch = false;
 
     /** Opens the camera scanner and receives the scanned text (ZXing library). */
     private final ActivityResultLauncher<ScanOptions> qrScanner =
@@ -93,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         askForNotificationPermissionOnce();
 
         repo = LibraryRepository.get(this);
+        listenToSharedCatalogue();
         searchBox = (EditText) findViewById(R.id.search_box);
         resultCount = (TextView) findViewById(R.id.result_count);
 
@@ -119,16 +118,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Sync the catalogue with the library web system (long-press to change the server).
-        syncButton = (TextView) findViewById(R.id.btn_sync);
-        syncButton.setOnClickListener(v -> onSyncTapped());
-        syncButton.setOnLongClickListener(v -> {
-            askForServer();
-            return true;
-        });
-        if (CatalogueSync.server(this) != null && CatalogueSync.hasServerCatalogue(this)) {
-            sync(false);   // quietly refresh copy counts on every launch
-        }
+        // Circulation desk for librarians and administrators.
+        findViewById(R.id.btn_desk).setOnClickListener(v -> startActivity(new Intent(this, DeskActivity.class)));
 
         // Scan a book's QR label -> its details screen.
         findViewById(R.id.btn_scan).setOnClickListener(v -> startQrScan());
@@ -154,96 +145,37 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (adapter == null) return;   // redirected to the sign-in screen
-        // Runs on first open and every time the user comes back, so copy counts are always current.
-        try {
-            repo.expireUncollected(Validator.today());
-        } catch (SQLException e) {
-            // Not critical: the list still loads.
-        }
         loadBooks();
     }
 
-    private void onSyncTapped() {
-        if (CatalogueSync.server(this) == null) {
-            askForServer();
-        } else if (!CatalogueSync.hasServerCatalogue(this)) {
-            confirmFirstSync();
-        } else {
-            sync(true);
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (catalogueListener != null) catalogueListener.remove();
     }
 
-    /** Dialog to type the library server's address, e.g. 192.168.1.10:8000. */
-    private void askForServer() {
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        input.setHint(R.string.server_hint);
-        String saved = CatalogueSync.server(this);
-        if (saved != null) input.setText(saved.replaceFirst("^http://", ""));
-        int pad = (int) (20 * getResources().getDisplayMetrics().density);
-        android.widget.FrameLayout box = new android.widget.FrameLayout(this);
-        box.setPadding(pad, pad / 2, pad, 0);
-        box.addView(input);
-
-        final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.server_title)
-                .setMessage(R.string.server_message)
-                .setView(box)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.save_and_sync, null)
-                .create();
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String base = ServerAddress.normalise(input.getText().toString());
-            if (base == null) {
-                input.setError(getString(R.string.server_invalid));
-                return;
-            }
-            CatalogueSync.setServer(this, base);
-            dialog.dismiss();
-            onSyncTapped();
-        }));
-        dialog.show();
-    }
-
-    /** The first sync replaces the sample books, so the student confirms it once. */
-    private void confirmFirstSync() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.first_sync_title)
-                .setMessage(R.string.first_sync_message)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.sync_now, (d, w) -> sync(true))
-                .show();
-    }
-
-    /** @param loud true when the student tapped Sync: show the outcome; false for the quiet launch refresh */
-    private void sync(final boolean loud) {
-        if (syncing) return;
-        syncing = true;
-        syncButton.setText(R.string.syncing);
-        CatalogueSync.run(this, new CatalogueSync.Callback() {
+    /**
+     * Keeps the phone's SQLite catalogue in step with the shared one in Firestore. Copy counts change
+     * here as soon as anyone reserves, collects or returns a book. Until a librarian publishes a
+     * catalogue the sample books stay on the phone.
+     */
+    private void listenToSharedCatalogue() {
+        catalogueListener = CloudLibrary.listenToCatalogue(new CloudLibrary.Listener<List<Book>>() {
             @Override
-            public void onSynced(int bookCount) {
-                syncing = false;
-                syncButton.setText(R.string.sync);
-                loadBooks();
-                if (loud) {
-                    Toast.makeText(MainActivity.this, getString(R.string.sync_done, bookCount),
-                            Toast.LENGTH_SHORT).show();
+            public void onChange(List<Book> books) {
+                if (books.isEmpty()) return;   // nothing published yet: keep the sample books
+                try {
+                    repo.replaceCatalogue(books);
+                    sharedCatalogue = true;
+                    loadBooks();
+                } catch (SQLException e) {
+                    // Keep showing the previous copy.
                 }
             }
 
             @Override
-            public void onFailed(String message) {
-                syncing = false;
-                syncButton.setText(R.string.sync);
-                if (loud) {
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle(R.string.sync_failed_title)
-                            .setMessage(message + "\n\n" + getString(R.string.sync_offline_note))
-                            .setPositiveButton(android.R.string.ok, null)
-                            .setNeutralButton(R.string.change_server, (d, w) -> askForServer())
-                            .show();
-                }
+            public void onError(String message) {
+                // Offline or not allowed: the copy on the phone is still shown.
             }
         });
     }
@@ -291,18 +223,19 @@ public class MainActivity extends AppCompatActivity {
         UserDirectory.loadOrCreate(user.getUid(), fallbackProfile(user), new UserDirectory.Result<UserProfile>() {
             @Override
             public void onSuccess(UserProfile p) {
-                if (isFinishing()) return;
+                if (isFinishing() || isDestroyed()) return;
                 if (p.suspended) {
                     showSuspended();
                     return;
                 }
                 Session.set(MainActivity.this, p);
                 showProfile(p);
+                openDeskForLibrarian(p);
             }
 
             @Override
             public void onError(String message) {
-                if (isFinishing()) return;
+                if (isFinishing() || isDestroyed()) return;
                 // Offline: keep using the saved profile. With none saved, explain why tools are missing.
                 if (Session.get(MainActivity.this, user.getUid()) == null) {
                     accountBanner.setText(getString(R.string.profile_not_loaded, message));
@@ -342,14 +275,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         boolean admin = Roles.canManageUsers(p.role, p.approved);
+        boolean desk = Roles.canRunDesk(p.role, p.approved);
         findViewById(R.id.btn_manage_users).setVisibility(admin ? View.VISIBLE : View.GONE);
-        findViewById(R.id.role_tools).setVisibility(admin ? View.VISIBLE : View.GONE);
+        findViewById(R.id.btn_desk).setVisibility(desk ? View.VISIBLE : View.GONE);
+        findViewById(R.id.role_tools).setVisibility(admin || desk ? View.VISIBLE : View.GONE);
+    }
+
+    /** A librarian's work starts at the desk, so open it straight after sign-in (once per launch). */
+    private void openDeskForLibrarian(UserProfile p) {
+        if (deskOpenedThisLaunch || !Roles.LIBRARIAN.equals(p.effectiveRole())) return;
+        deskOpenedThisLaunch = true;
+        startActivity(new Intent(this, DeskActivity.class));
     }
 
     /** An administrator suspended this account: sign out and explain. */
     private void showSuspended() {
         FirebaseAuth.getInstance().signOut();
         Session.clear(this);
+        PickupReminders.clearAll(this);
         new AlertDialog.Builder(this)
                 .setTitle(R.string.suspended_title)
                 .setMessage(R.string.suspended_message)
@@ -377,6 +320,8 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.sign_out, (dialog, which) -> {
                     FirebaseAuth.getInstance().signOut();
                     Session.clear(this);
+                    PickupReminders.clearAll(this);
+                    deskOpenedThisLaunch = false;
                     goToLogin();
                 })
                 .show();
@@ -394,9 +339,8 @@ public class MainActivity extends AppCompatActivity {
             List<Book> books = repo.getBooks(searchBox.getText().toString());
             adapter.setBooks(books);
             String count = getResources().getQuantityString(R.plurals.books_found, books.size(), books.size());
-            long last = CatalogueSync.lastSync(this);
-            resultCount.setText(last == 0 ? count : getString(R.string.count_with_sync, count,
-                    new SimpleDateFormat("d MMM, HH:mm", Locale.ENGLISH).format(new Date(last))));
+            resultCount.setText(sharedCatalogue ? getString(R.string.count_live, count)
+                    : getString(R.string.count_sample, count));
         } catch (SQLException e) {
             Toast.makeText(this, R.string.error_loading, Toast.LENGTH_LONG).show();
         }

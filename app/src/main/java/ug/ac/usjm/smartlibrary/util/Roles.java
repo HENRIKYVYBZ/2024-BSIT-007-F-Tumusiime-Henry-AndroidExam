@@ -78,6 +78,11 @@ public final class Roles {
         return 7;
     }
 
+    /** How many days a collected book may be kept: 14 for students, 30 for staff. */
+    public static int loanDays(String role, boolean approved) {
+        return STUDENT.equals(effective(role, approved)) ? 14 : 30;
+    }
+
     /** Librarians (and administrators) run the circulation desk. */
     public static boolean canRunDesk(String role, boolean approved) {
         String r = effective(role, approved);

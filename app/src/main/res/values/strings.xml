@@ -35,7 +35,7 @@
     <string name="hint_pickup">Tap to choose (within 7 days)</string>
     <string name="confirm_reservation">Confirm reservation</string>
     <string name="reserved_title">Book reserved</string>
-    <string name="reserved_message">\"%1$s\" is reserved for you.\n\nCollect it on %2$s at the express counter (%3$s).\n\nReservation number: %4$d</string>
+    <string name="reserved_message">\"%1$s\" is reserved for you.\n\nCollect it on %2$s at the express counter (%3$s).\n\nReservation code: %4$s</string>
     <string name="cannot_reserve_title">Could not reserve</string>
     <string name="done">Done</string>
 
@@ -43,13 +43,13 @@
     <string name="my_reservations_title">My reservations</string>
     <string name="empty_reservations">You have no reservations yet.\nOpen a book and tap \"Reserve for pickup\".</string>
     <string name="pickup_on">Pickup: %1$s  •  %2$s</string>
-    <string name="reserved_by">%1$s  •  %2$s  •  #%3$d</string>
+    <string name="reserved_by">%1$s  •  %2$s  •  #%3$s</string>
     <string name="status_active">Active</string>
     <string name="status_cancelled">Cancelled</string>
     <string name="status_expired">Expired</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_title">Cancel reservation?</string>
-    <string name="cancel_message">\"%1$s\" will go back on the shelf for other students.</string>
+    <string name="cancel_message">\"%1$s\" will go back on the shelf for other readers.</string>
     <string name="keep_it">Keep it</string>
     <string name="cancel_reservation">Cancel reservation</string>
     <string name="cancelled_toast">Reservation cancelled</string>
@@ -107,22 +107,13 @@
     <string name="scan_unknown_title">Not a library label</string>
     <string name="scan_unknown_message">That QR code is not a USJM library book label. Scan the QR sticker on the book\'s cover.</string>
 
-    <!-- Sync with the library web system -->
-    <string name="sync">Sync</string>
-    <string name="syncing">Syncing…</string>
-    <string name="sync_now">Sync now</string>
+    <!-- Web system address (librarians import the catalogue from it) -->
     <string name="server_title">Library server</string>
     <string name="server_message">Type the address of the USJM Smart Library web system, e.g. the laptop running it on this Wi-Fi.</string>
     <string name="server_hint">e.g. 192.168.1.10:8000</string>
     <string name="server_invalid">Use an address like 192.168.1.10:8000</string>
-    <string name="save_and_sync">Save and sync</string>
     <string name="change_server">Change server</string>
-    <string name="first_sync_title">Use the library\'s catalogue?</string>
-    <string name="first_sync_message">The sample books on this phone will be replaced by the library server\'s catalogue. Reservations made on the sample books will be removed.</string>
-    <string name="sync_done">Catalogue updated: %1$d books</string>
-    <string name="sync_failed_title">Sync failed</string>
-    <string name="sync_offline_note">You can keep using the copy of the catalogue saved on this phone.</string>
-    <string name="count_with_sync">%1$s  •  synced %2$s</string>
+    <string name="sync_failed_title">Import failed</string>
 
     <!-- Roles and accounts -->
     <string name="label_i_am">I am a</string>
@@ -173,6 +164,60 @@
     <string name="reject">Reject</string>
     <string name="joined_on">Joined %1$s</string>
     <string name="approved_toast">✓ %1$s approved as %2$s</string>
+
+    <!-- Shared catalogue and reservations (Cloud Firestore) -->
+    <string name="reserving">Reserving…</string>
+    <string name="count_live">%1$s  •  live</string>
+    <string name="count_sample">%1$s  •  sample books</string>
+    <string name="status_on_loan">On loan</string>
+    <string name="status_overdue">Overdue</string>
+    <string name="status_returned">Returned</string>
+    <string name="status_no_show">Not collected</string>
+    <string name="due_back_on">Due back %1$s</string>
+    <plurals name="overdue_by">
+        <item quantity="one">%1$d day overdue (was due %2$s)</item>
+        <item quantity="other">%1$d days overdue (was due %2$s)</item>
+    </plurals>
+
+    <!-- Circulation desk (librarians) -->
+    <string name="circulation_desk">Circulation desk</string>
+    <string name="catalogue">Catalogue</string>
+    <string name="librarians_only">Only librarians can open the circulation desk.</string>
+    <string name="scan_prompt_desk">Scan the QR label on the book being collected or returned</string>
+    <string name="tab_pickups">Pickups %1$d</string>
+    <string name="tab_loans">On loan %1$d</string>
+    <string name="tab_overdue">Overdue %1$d</string>
+    <string name="tab_stock">Stock %1$d</string>
+    <string name="filter_chip">Showing: %1$s   ✕</string>
+    <string name="empty_pickups">No books are waiting to be collected.</string>
+    <string name="empty_loans">No books are on loan right now.</string>
+    <string name="empty_overdue">Nothing is overdue.</string>
+    <string name="empty_stock">Every book has at least two copies on the shelf.</string>
+    <string name="empty_for_book">No one has reserved or borrowed this book here. Tap the dark chip to show all books.</string>
+    <string name="desk_person">%1$s  •  %2$s  •  #%3$s</string>
+    <string name="flag_today">TODAY</string>
+    <string name="no_show">No-show</string>
+    <string name="mark_collected">✓  Collected</string>
+    <string name="mark_returned">✓  Returned</string>
+    <string name="collected_toast">On loan to %1$s, due back %2$s</string>
+    <string name="no_show_title">Mark as not collected?</string>
+    <string name="no_show_message">%1$s did not collect \"%2$s\". The copy goes back on the shelf for others.</string>
+    <string name="no_show_toast">Marked as not collected; the copy is back on the shelf</string>
+    <string name="returned_toast">\"%1$s\" is back on the shelf</string>
+    <string name="catalogue_empty_message">The shared catalogue is empty, so readers only see sample books on their own phones and can\'t reserve yet. Publish a catalogue to start.</string>
+    <string name="publish_samples_short">Sample books</string>
+    <string name="import_short">From web system</string>
+    <string name="catalogue_menu_title">Shared catalogue</string>
+    <string name="import_from_server">Import from the web system</string>
+    <string name="publish_samples">Publish the sample books</string>
+    <string name="publish_samples_message">Every phone will get these %1$d sample books as the library catalogue. Copies already reserved or on loan are kept.</string>
+    <string name="publish">Publish</string>
+    <string name="import_message">Download the catalogue from %1$s and share it with every phone? Copies already reserved or on loan are kept.</string>
+    <string name="import_now">Import</string>
+    <string name="importing">Importing the catalogue…</string>
+    <string name="published_toast">Shared catalogue updated: %1$d books</string>
+    <string name="save_and_import">Save and import</string>
+    <string name="save">Save</string>
 
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>

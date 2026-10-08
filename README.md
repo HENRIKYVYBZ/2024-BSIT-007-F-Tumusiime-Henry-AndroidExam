@@ -15,10 +15,11 @@ Library Management System.
 | Sign in | Email and password (Firebase Authentication), Show/Hide password, links to Forgot password and Create account; skipped when already signed in |
 | Create account | I am a student / teaching staff / non-teaching staff, full name, registration number or staff ID, email, password and confirmation, all validated; sends a verification email |
 | Reset password | Sends a password-reset link to the student's email |
-| Catalogue | Greets the signed-in student; lists every book from the phone's SQLite database; live search by title, author or subject; shows how many copies are available |
+| Catalogue | Greets the signed-in person with a colour-coded role badge; lists every book from the phone's SQLite copy of the shared catalogue (kept live from Cloud Firestore); live search by title, author or subject; shows how many copies are available |
 | Book details | Shelf location, subject, year, description and availability; Reserve button (disabled when no copies are left) |
-| Reserve | Form with full name, registration number and pickup date (calendar); validates every field; saves the reservation to SQLite in one transaction |
-| My reservations | Lists reservations (Active / Cancelled / Expired); cancel with confirmation, which puts the copy back on the shelf |
+| Reserve | Form with full name, registration number or staff ID and pickup date (calendar); validates every field; saves the reservation to Cloud Firestore in one transaction, so the last copy can never go to two people |
+| My reservations | Live list of holds and loans (Active / On loan with due date / Overdue / Returned / Cancelled / Not collected / Expired); cancel with confirmation, which puts the copy back on the shelf |
+| Circulation desk (librarians) | Tabs for Pickups, On loan, Overdue and Stock; mark a hold **Collected** (starts a loan with a due date) or **No-show**, and a loan **Returned**; scan a book's QR label to see only that book's holds and loans; publish the shared catalogue (sample books, or import from the web system's REST API) |
 | Manage users (administrators) | Approve staff accounts, reject a staff request, change anyone's role (e.g. make a librarian), suspend or restore an account; search by name, email or ID |
 
 ## User roles
@@ -31,7 +32,7 @@ Library Management System.
 | Librarian | Given by an administrator | 5 | 14 days |
 | Administrator | Given by another administrator (the first one is set in the Firebase console) | 5 | 14 days |
 
-Staff waiting for approval can use the app with student limits. Roles are stored in Cloud Firestore
+Loans last 14 days for students and 30 days for staff. Staff waiting for approval can use the app with student limits. Roles are stored in Cloud Firestore
 (`users/{uid}`) and protected by `firestore.rules`: nobody can give themselves a role, approve
 themselves or lift their own suspension, even with a modified app.
 
@@ -46,8 +47,9 @@ Library rules enforced by the app:
 
 - Java, Android SDK (min SDK 24), AppCompat
 - Firebase Authentication (email and password accounts, password-reset email)
-- Cloud Firestore (user profiles and roles), protected by security rules in `firestore.rules`
-- SQLite through `SQLiteOpenHelper` (tables `books` and `reservations`)
+- Cloud Firestore (user profiles and roles, the shared catalogue, reservations and loans) with live listeners
+  and transactions, protected by security rules in `firestore.rules`
+- SQLite (`SQLiteOpenHelper`) as the phone's offline copy of the catalogue for fast search
 - `SharedPreferences` to remember the student's name and registration number
 - JUnit 4 unit tests for the form validation rules (20 tests)
 
@@ -83,6 +85,9 @@ docs/                          diagrams, wireframes and report
 4. Open the project in Android Studio and wait for Gradle sync to finish.
 5. Start an emulator (Device Manager) or connect an Android phone with USB debugging on.
 6. Press **Run ▶**, then create an account on the Sign in screen.
+7. Make an account a librarian (Manage users → Change role → Librarian), sign in with it, open the
+   **Circulation desk** and publish the catalogue (Catalogue → Publish the sample books, or Import
+   from the web system). Until then readers see sample books and can't reserve.
 
 Run the unit tests: right-click `app/src/test/java/ug.ac.usjm.smartlibrary/util/ValidatorTest` → **Run**.
 
@@ -91,9 +96,8 @@ The registration number format accepted is `2023/BIT/0457` (or `USJM/23/BIT/045`
 
 ## Planned for the final submission
 
-- Sync the catalogue and reservations with the Smart Library web system (REST API), keeping SQLite as an offline cache
-- Pickup reminder notifications
-- Scan a book's QR label to open its details
+- Circulation desk extras: walk-in issue, add and edit books, overdue reminders
+- Teaching staff: book recommendations and course reading lists; administrator statistics
 - Full test plan and a signed release APK
 
 ## Acknowledgements

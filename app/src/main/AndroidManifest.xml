@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartLibraryApp"
         android:usesCleartextTraffic="true">
-        <!-- usesCleartextTraffic: the demo library server runs on plain http:// on the local Wi-Fi.
+        <!-- usesCleartextTraffic: librarians import the catalogue from the demo web system on plain http:// (local Wi-Fi).
              A production server would use https:// and this could be removed. -->
 
         <!-- Sign in (opens when the app icon is tapped) -->
@@ -74,6 +74,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="stateHidden" />
+
+        <!-- Librarians: circulation desk -->
+        <activity
+            android:name=".DeskActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
 
         <!-- QR scanner screen from the ZXing library: allow portrait as well as landscape -->
         <activity

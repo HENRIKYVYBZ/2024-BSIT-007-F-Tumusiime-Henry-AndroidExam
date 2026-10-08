@@ -89,7 +89,7 @@ public class AdminActivity extends AppCompatActivity implements UserAdapter.OnDe
         UserDirectory.listAll(new UserDirectory.Result<List<UserProfile>>() {
             @Override
             public void onSuccess(List<UserProfile> users) {
-                if (isFinishing()) return;
+                if (isFinishing() || isDestroyed()) return;
                 everyone.clear();
                 everyone.addAll(users);
                 showList();
@@ -97,7 +97,7 @@ public class AdminActivity extends AppCompatActivity implements UserAdapter.OnDe
 
             @Override
             public void onError(String message) {
-                if (isFinishing()) return;
+                if (isFinishing() || isDestroyed()) return;
                 emptyView.setText(message);
                 adapter.setUsers(new ArrayList<UserProfile>());
             }
@@ -250,7 +250,7 @@ public class AdminActivity extends AppCompatActivity implements UserAdapter.OnDe
     }
 
     private void showError(String message) {
-        if (isFinishing()) return;
+        if (isFinishing() || isDestroyed()) return;
         new AlertDialog.Builder(this)
                 .setTitle(R.string.could_not_save)
                 .setMessage(message)

@@ -27,10 +27,10 @@ public class PickupReminderReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (!ACTION_REMIND.equals(intent.getAction())) return;
 
-        long id = intent.getLongExtra(PickupReminders.EXTRA_RESERVATION_ID, -1);
+        int id = intent.getIntExtra(PickupReminders.EXTRA_ALARM_ID, 0);
         String title = intent.getStringExtra(PickupReminders.EXTRA_TITLE);
         String shelf = intent.getStringExtra(PickupReminders.EXTRA_SHELF);
-        if (id < 0 || title == null) return;
+        if (title == null) return;
 
         // Android 13+ needs the user's permission to show notifications.
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context,
@@ -44,7 +44,7 @@ public class PickupReminderReceiver extends BroadcastReceiver {
         Intent open = new Intent(context, MyReservationsActivity.class);
         PendingIntent tap = TaskStackBuilder.create(context)
                 .addNextIntentWithParentStack(open)
-                .getPendingIntent((int) id, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                .getPendingIntent(id, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder n = new NotificationCompat.Builder(context, PickupReminders.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
@@ -57,6 +57,6 @@ public class PickupReminderReceiver extends BroadcastReceiver {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setContentIntent(tap)
                 .setAutoCancel(true);
-        NotificationManagerCompat.from(context).notify((int) id, n.build());
+        NotificationManagerCompat.from(context).notify(id, n.build());
     }
 }

@@ -5,21 +5,26 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Creates and opens the app's local SQLite database (smartlibrary.db).
  *
- * Tables:
- *   books        - the catalogue, with total and available copies
- *   reservations - books reserved by students for pickup at the library desk (one row per reservation)
+ * Table:
+ *   books - the phone's copy of the library catalogue, for fast search and offline browsing.
+ *           It mirrors the shared catalogue in Cloud Firestore (or holds the sample books until a
+ *           librarian publishes one). Reservations live in Firestore so librarians can see them.
  */
 public class LibraryDbHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "smartlibrary.db";
-    // Version 2 links each reservation to the signed-in student's Firebase account (student_uid).
-    public static final int DB_VERSION = 2;
+    // Version 2 linked reservations to the Firebase account; version 3 moved reservations to Firestore.
+    public static final int DB_VERSION = 3;
 
     public static final String T_BOOKS = "books";
-    public static final String T_RESERVATIONS = "reservations";
+    /** Old table (versions 1-2), dropped on upgrade. */
+    private static final String T_OLD_RESERVATIONS = "reservations";
 
     public LibraryDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -43,29 +48,19 @@ public class LibraryDbHelper extends SQLiteOpenHelper {
                 + "description TEXT NOT NULL, "
                 + "total_copies INTEGER NOT NULL CHECK (total_copies >= 0), "
                 + "available_copies INTEGER NOT NULL CHECK (available_copies >= 0))");
-        db.execSQL("CREATE TABLE " + T_RESERVATIONS + " ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "book_id INTEGER NOT NULL REFERENCES " + T_BOOKS + "(id), "
-                + "student_uid TEXT NOT NULL, "   // Firebase user id of the student
-                + "student_name TEXT NOT NULL, "
-                + "reg_number TEXT NOT NULL, "
-                + "pickup_date TEXT NOT NULL, "   // yyyy-MM-dd
-                + "status TEXT NOT NULL DEFAULT 'ACTIVE', "
-                + "created_at INTEGER NOT NULL)");
         seedBooks(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Prototype: rebuild the database when the schema changes.
-        db.execSQL("DROP TABLE IF EXISTS " + T_RESERVATIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + T_OLD_RESERVATIONS);
         db.execSQL("DROP TABLE IF EXISTS " + T_BOOKS);
         onCreate(db);
     }
 
-    /** Sample catalogue so the app has data on first launch. */
-    private void seedBooks(SQLiteDatabase db) {
-        Object[][] books = {
+    /** Sample catalogue so the app has data on first launch (and for the librarian to publish). */
+    private static final Object[][] SAMPLE = {
                 {"Introduction to Algorithms", "Cormen, Leiserson, Rivest & Stein", "Computer Science", "Level 1, Shelf A1", 2022,
                         "The standard reference on designing and analysing algorithms.", 3},
                 {"Database System Concepts", "Silberschatz, Korth & Sudarshan", "Computer Science", "Level 1, Shelf A6", 2019,
@@ -97,16 +92,30 @@ public class LibraryDbHelper extends SQLiteOpenHelper {
                 {"Song of Lawino", "Okot p'Bitek", "General Collection", "Level 1, Shelf H1", 1966,
                         "The celebrated Ugandan poem on tradition and change.", 2},
         };
-        for (Object[] b : books) {
+
+    /** The sample books with ids 1, 2, 3 ... and every copy on the shelf. */
+    public static List<Book> sampleBooks() {
+        List<Book> list = new ArrayList<>();
+        for (int i = 0; i < SAMPLE.length; i++) {
+            Object[] b = SAMPLE[i];
+            list.add(new Book(i + 1, (String) b[0], (String) b[1], (String) b[2], (String) b[3], (Integer) b[4],
+                    (String) b[5], (Integer) b[6], (Integer) b[6]));
+        }
+        return list;
+    }
+
+    private void seedBooks(SQLiteDatabase db) {
+        for (Book b : sampleBooks()) {
             ContentValues v = new ContentValues();
-            v.put("title", (String) b[0]);
-            v.put("author", (String) b[1]);
-            v.put("category", (String) b[2]);
-            v.put("shelf", (String) b[3]);
-            v.put("year", (Integer) b[4]);
-            v.put("description", (String) b[5]);
-            v.put("total_copies", (Integer) b[6]);
-            v.put("available_copies", (Integer) b[6]);
+            v.put("id", b.id);
+            v.put("title", b.title);
+            v.put("author", b.author);
+            v.put("category", b.category);
+            v.put("shelf", b.shelf);
+            v.put("year", b.year);
+            v.put("description", b.description);
+            v.put("total_copies", b.totalCopies);
+            v.put("available_copies", b.availableCopies);
             db.insert(T_BOOKS, null, v);
         }
     }

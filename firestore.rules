@@ -14,14 +14,19 @@ service cloud.firestore {
     function hasProfile() {
       return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
+    // get(field, default) so a profile edited by hand without a field doesn't break the rules.
     function active() {
-      return hasProfile() && profile().suspended != true;
+      return hasProfile() && profile().get('suspended', false) != true;
     }
     function isAdmin() {
-      return active() && profile().role == 'admin';
+      return active() && profile().get('role', '') == 'admin';
     }
     function isLibrarian() {   // administrators can do everything a librarian can
-      return active() && profile().role in ['librarian', 'admin'];
+      return active() && profile().get('role', '') in ['librarian', 'admin'];
+    }
+    // The role whose limits apply: staff waiting for approval count as students.
+    function effectiveRole() {
+      return profile().get('approved', false) == true ? profile().get('role', 'student') : 'student';
     }
 
     // users/{uid}: one profile per account (name, role, ID number, approval)
@@ -42,6 +47,54 @@ service cloud.firestore {
         || (signedIn() && request.auth.uid == uid
             && !request.resource.data.diff(resource.data).affectedKeys()
                  .hasAny(['role', 'approved', 'suspended']));
+
+      allow delete: if false;
+    }
+
+    // books/{bookId}: the shared catalogue
+    match /books/{bookId} {
+      allow read: if signedIn();
+      // Only librarians publish, edit or remove books.
+      allow create, delete: if isLibrarian();
+      // Readers may only take one copy for a new hold of their own, or put one back when
+      // they cancel their hold, in the same transaction (lastReservation names that hold).
+      allow update: if isLibrarian() || (active() && copyTakenOrReturned(bookId));
+    }
+    function copyTakenOrReturned(bookId) {
+      let before = resource.data.availableCopies;
+      let after = request.resource.data.availableCopies;
+      let hold = /databases/$(database)/documents/reservations/$(request.resource.data.lastReservation);
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['availableCopies', 'updatedAt', 'lastReservation'])
+        && after >= 0 && after <= resource.data.totalCopies
+        && getAfter(hold).data.userUid == request.auth.uid
+        && getAfter(hold).data.bookId == int(bookId)
+        && ((after == before - 1 && !exists(hold) && getAfter(hold).data.status == 'ACTIVE')
+            || (after == before + 1 && get(hold).data.status == 'ACTIVE'
+                && getAfter(hold).data.status in ['CANCELLED', 'EXPIRED']));
+    }
+
+    // reservations/{id}: every hold and loan
+    match /reservations/{id} {
+      // You see your own; librarians see everyone's.
+      allow read: if signedIn() && (resource.data.userUid == request.auth.uid || isLibrarian());
+
+      // You can only reserve for yourself, with your real role, and only by taking a copy
+      // off the shelf in the same transaction. A new reservation always starts ACTIVE.
+      allow create: if active()
+        && request.resource.data.userUid == request.auth.uid
+        && request.resource.data.status == 'ACTIVE'
+        && request.resource.data.role == effectiveRole()
+        && getAfter(/databases/$(database)/documents/books/$(string(request.resource.data.bookId))).data.availableCopies
+           == get(/databases/$(database)/documents/books/$(string(request.resource.data.bookId))).data.availableCopies - 1;
+
+      // You may cancel your own waiting hold (or let it expire). Only librarians mark
+      // Collected, No-show or Returned.
+      allow update: if isLibrarian()
+        || (active() && resource.data.userUid == request.auth.uid
+            && resource.data.status == 'ACTIVE'
+            && request.resource.data.status in ['CANCELLED', 'EXPIRED']
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
 
       allow delete: if false;
     }

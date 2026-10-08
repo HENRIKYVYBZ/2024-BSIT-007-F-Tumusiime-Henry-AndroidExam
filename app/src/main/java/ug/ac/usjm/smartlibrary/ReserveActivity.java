@@ -22,8 +22,9 @@ import java.util.Calendar;
 import ug.ac.usjm.smartlibrary.auth.ProfileStore;
 import ug.ac.usjm.smartlibrary.auth.Session;
 import ug.ac.usjm.smartlibrary.data.Book;
+import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
-import ug.ac.usjm.smartlibrary.data.ReservationException;
+import ug.ac.usjm.smartlibrary.data.Reservation;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.DateText;
@@ -31,7 +32,8 @@ import ug.ac.usjm.smartlibrary.util.Roles;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
 /**
- * Screen 3 - Reserve: a form that validates the student's details and saves the reservation to SQLite.
+ * Screen 3 - Reserve: a form that validates the person's details and saves the reservation to Cloud
+ * Firestore, where the librarians see it. Taking the copy is a Firestore transaction (see CloudLibrary).
  * The person's name and registration number / staff ID are remembered (SharedPreferences) to save typing next time.
  * Limits depend on the role: e.g. students may book 7 days ahead and hold 3 books, lecturers 14 days and 10 books.
  */
@@ -50,6 +52,8 @@ public class ReserveActivity extends AppCompatActivity {
     private String role = Roles.STUDENT;
     private int maxDaysAhead;
     private int maxActive;
+    private UserProfile profile;
+    private android.widget.Button confirmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +80,7 @@ public class ReserveActivity extends AppCompatActivity {
 
         // The signed-in person's role decides the ID field and the limits.
         FirebaseUser signedIn = FirebaseAuth.getInstance().getCurrentUser();
-        UserProfile profile = signedIn == null ? null : Session.get(this, signedIn.getUid());
+        profile = signedIn == null ? null : Session.get(this, signedIn.getUid());
         boolean approved = profile == null || profile.approved;
         if (profile != null) role = profile.role;
         maxDaysAhead = Roles.maxPickupDaysAhead(role, approved);
@@ -118,7 +122,8 @@ public class ReserveActivity extends AppCompatActivity {
                 showDatePicker();
             }
         });
-        findViewById(R.id.btn_confirm).setOnClickListener(new View.OnClickListener() {
+        confirmButton = (android.widget.Button) findViewById(R.id.btn_confirm);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submit();
@@ -158,8 +163,8 @@ public class ReserveActivity extends AppCompatActivity {
 
     /** Validate every field, show errors next to the fields, and save only if all are valid. */
     private void submit() {
-        String name = nameInput.getText().toString().trim();
-        String reg = Validator.normaliseRegNumber(regInput.getText().toString());
+        final String name = nameInput.getText().toString().trim();
+        final String reg = Validator.normaliseRegNumber(regInput.getText().toString());
 
         String nameError = Validator.nameError(name);
         String regError = Validator.idNumberError(role, reg);
@@ -182,33 +187,47 @@ public class ReserveActivity extends AppCompatActivity {
             return;
         }
 
-        try {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user == null) {           // signed out in the meantime
-                finish();
-                return;
-            }
-            long id = LibraryRepository.get(this).reserve(book.id, user.getUid(), name, reg, pickupDate,
-                    maxActive);
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit()
-                    .putString(KEY_NAME, name)
-                    .putString(KEY_REG, reg)
-                    .apply();
-            // Remind the student on the morning of the pickup day.
-            PickupReminders.schedule(this, id, book.title, book.shelf, pickupDate);
-            showSuccess(id);
-        } catch (ReservationException e) {
-            showProblem(e.getMessage());          // a library rule said no
-        } catch (SQLException e) {
-            showProblem(getString(R.string.error_saving));   // the database failed
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {           // signed out in the meantime
+            finish();
+            return;
         }
+        UserProfile person = profile != null ? profile
+                : UserProfile.newAccount(user.getUid(), name, user.getEmail(), Roles.STUDENT, reg);
+        setBusy(true);
+        CloudLibrary.reserve(book, person, name, reg, pickupDate, maxActive, new CloudLibrary.Result<Reservation>() {
+            @Override
+            public void onSuccess(Reservation r) {
+                if (isFinishing() || isDestroyed()) return;
+                setBusy(false);
+                getSharedPreferences(PREFS, MODE_PRIVATE).edit()
+                        .putString(KEY_NAME, name)
+                        .putString(KEY_REG, reg)
+                        .apply();
+                // Remind the person on the morning of the pickup day.
+                PickupReminders.schedule(ReserveActivity.this, r);
+                showSuccess(r.code());
+            }
+
+            @Override
+            public void onError(String message) {
+                if (isFinishing() || isDestroyed()) return;
+                setBusy(false);
+                showProblem(message);   // a library rule said no, or no internet
+            }
+        });
     }
 
-    private void showSuccess(long reservationId) {
+    private void setBusy(boolean busy) {
+        confirmButton.setEnabled(!busy);
+        confirmButton.setText(busy ? R.string.reserving : R.string.confirm_reservation);
+    }
+
+    private void showSuccess(String code) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.reserved_title)
                 .setMessage(getString(R.string.reserved_message, book.title, DateText.pretty(pickupDate),
-                        book.shelf, reservationId))
+                        book.shelf, code))
                 .setCancelable(false)
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
