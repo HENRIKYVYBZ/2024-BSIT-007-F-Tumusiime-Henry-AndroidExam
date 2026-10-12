@@ -18,6 +18,7 @@ import java.util.Set;
 
 import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.Reservation;
+import ug.ac.usjm.smartlibrary.notify.LoanReminders;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.Loans;
 import ug.ac.usjm.smartlibrary.util.Validator;
@@ -67,6 +68,7 @@ public class MyReservationsActivity extends AppCompatActivity
                         CloudLibrary.expire(r, retryLater(r.id));
                     }
                     PickupReminders.sync(MyReservationsActivity.this, r);
+                    LoanReminders.sync(MyReservationsActivity.this, r);
                 }
                 adapter.setReservations(reservations);
             }

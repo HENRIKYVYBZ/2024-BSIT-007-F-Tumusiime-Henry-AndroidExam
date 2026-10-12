@@ -1,0 +1,51 @@
+@startuml
+!include common.iuml
+title Activity diagram - Reserve a book and collect it
+|Reader|
+start
+:Open the catalogue\n(live copy counts);
+:Search, or scan the book's QR label;
+:Open the book's details;
+if (A copy on the shelf?) then (no)
+  :Reserve button disabled\n"No copies available";
+  stop
+else (yes)
+endif
+:Tap "Reserve for pickup";
+|App|
+:Show form, pre-filled from the profile;\nlimits depend on the role\n(student: 7 days ahead, 3 holds);
+|Reader|
+repeat
+  :Enter name, registration no. or staff ID;
+  :Choose the pickup date;
+  :Tap "Confirm reservation";
+  |App|
+  :Validate every field;
+repeat while (All fields valid?) is (no: error shown\nnext to the field)
+->yes;
+:Check limits in Firestore\n(no duplicate, under the hold limit);
+if (Limits OK?) then (no)
+  :Show the reason, e.g.\n"You can hold at most 3";
+  stop
+else (yes)
+endif
+:Firestore transaction:\ntake one copy and create the hold (ACTIVE);
+if (Still a copy left?) then (no)
+  :"The last copy was just taken";
+  stop
+else (yes)
+endif
+:Schedule 08:00 pickup reminder;\nshow reservation code;
+|Librarian|
+:On the pickup day, open the\ncirculation desk (Pickups tab);
+if (Reader came?) then (yes)
+  :Tap "Collected";\nloan starts with a due date;
+  |Reader|
+  :My reservations shows\n"On loan, due back ...";
+  |Librarian|
+  :Later: tap "Returned";\ncopy goes back on the shelf;
+else (no)
+  :Tap "No-show" (or it expires);\ncopy goes back on the shelf;
+endif
+stop
+@enduml

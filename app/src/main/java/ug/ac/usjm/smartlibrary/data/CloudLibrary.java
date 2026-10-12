@@ -375,4 +375,201 @@ public final class CloudLibrary {
             else result.onSuccess(null);
         });
     }
+
+    // ============================================================ one-off reads
+
+    /** The signed-in person's reservations, once (used on launch for reminders). */
+    public static void getMine(String uid, final Result<List<Reservation>> result) {
+        reservations().whereEqualTo("userUid", uid).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) result.onSuccess(toList(task.getResult()));
+            else result.onError(CloudMessages.from(task.getException()));
+        });
+    }
+
+    // =========================================================== walk-in issue
+
+    /** Librarians: finds the reader with this registration number or staff ID. */
+    public static void findReader(final String idNumber, final Result<UserProfile> result) {
+        db().collection("users").whereEqualTo("idNumber", idNumber).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                result.onError(CloudMessages.from(task.getException()));
+                return;
+            }
+            List<DocumentSnapshot> docs = task.getResult().getDocuments();
+            if (docs.isEmpty()) {
+                result.onError("No account has the ID " + idNumber
+                        + ". The reader needs to create an account in the app first.");
+                return;
+            }
+            UserProfile reader = UserProfile.from(docs.get(0));
+            if (reader.suspended) {
+                result.onError(reader.fullName + "'s account is suspended, so they can't borrow books.");
+                return;
+            }
+            result.onSuccess(reader);
+        });
+    }
+
+    /**
+     * Librarians: lends a copy straight away to a reader at the desk (no reservation).
+     * The loan appears in the reader's My reservations with its due date.
+     */
+    public static void issueWalkIn(final Book book, final UserProfile reader, final String librarian,
+                                   final Result<Reservation> result) {
+        reservations().whereEqualTo("userUid", reader.uid).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                result.onError(CloudMessages.from(task.getException()));
+                return;
+            }
+            for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                Reservation r = Reservation.from(d);
+                if (r.bookId != book.id) continue;
+                if (r.isActive()) {
+                    result.onError(reader.fullName + " already reserved this book. Find it under Pickups and tap Collected.");
+                    return;
+                }
+                if (r.isOnLoan()) {
+                    result.onError(reader.fullName + " already has this book on loan.");
+                    return;
+                }
+            }
+            final DocumentReference newRef = reservations().document();
+            final long now = System.currentTimeMillis();
+            final String today = Validator.today();
+            final String role = reader.effectiveRole();
+            final String due = Loans.dueDate(today, Roles.loanDays(role, true));
+            db().runTransaction(t -> {
+                DocumentSnapshot b = t.get(bookRef(book.id));
+                if (!b.exists()) return "This book is not in the shared catalogue.";
+                long available = number(b, "availableCopies");
+                if (available <= 0) return "No copy of \"" + book.title + "\" is on the shelf right now.";
+                t.update(bookRef(book.id), "availableCopies", available - 1, "updatedAt", now,
+                        "lastReservation", newRef.getId());
+                Map<String, Object> m = new HashMap<>();
+                m.put("bookId", book.id);
+                m.put("bookTitle", text(b, "title"));
+                m.put("shelf", text(b, "shelf"));
+                m.put("userUid", reader.uid);
+                m.put("userName", reader.fullName);
+                m.put("idNumber", reader.idNumber);
+                m.put("role", role);
+                m.put("pickupDate", today);
+                m.put("status", Reservation.COLLECTED);
+                m.put("collectedOn", today);
+                m.put("dueDate", due);
+                m.put("walkIn", true);
+                m.put("handledBy", librarian);
+                m.put("createdAt", now);
+                m.put("updatedAt", now);
+                t.set(newRef, m);
+                return null;
+            }).addOnCompleteListener(done -> {
+                if (!done.isSuccessful()) {
+                    result.onError(CloudMessages.from(done.getException()));
+                } else if (done.getResult() != null) {
+                    result.onError(done.getResult());
+                } else {
+                    Reservation r = new Reservation(newRef.getId(), book.id, book.title, book.shelf, reader.uid,
+                            reader.fullName, reader.idNumber, role, today, Reservation.COLLECTED, now, due, librarian);
+                    r.walkIn = true;
+                    result.onSuccess(r);
+                }
+            });
+        });
+    }
+
+    /** Librarians: asks the borrower to bring an overdue book back (shown on their phone). */
+    public static void sendReturnReminder(Reservation r, String librarian, final Result<Void> result) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("reminderSentOn", Validator.today());
+        m.put("handledBy", librarian);
+        m.put("updatedAt", System.currentTimeMillis());
+        reservations().document(r.id).update(m).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) result.onSuccess(null);
+            else result.onError(CloudMessages.from(task.getException()));
+        });
+    }
+
+    // ============================================================ edit books
+
+    /**
+     * Librarians: adds a new book (id = highest id + 1) or saves changes to one.
+     * Changing the number of copies keeps the copies that are out: available = total - out.
+     *
+     * @param bookId -1 for a new book
+     * @return (to result) the book's id
+     */
+    public static void saveBook(final long bookId, final Book changes, final Result<Long> result) {
+        if (bookId < 0) {
+            books().get().addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    result.onError(CloudMessages.from(task.getException()));
+                    return;
+                }
+                long max = 0;
+                for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                    Book b = bookFrom(d);
+                    if (b != null && b.id > max) max = b.id;
+                }
+                final long newId = max + 1;
+                Map<String, Object> m = bookFields(changes);
+                m.put("availableCopies", (long) changes.totalCopies);
+                bookRef(newId).set(m).addOnCompleteListener(done -> {
+                    if (done.isSuccessful()) result.onSuccess(newId);
+                    else result.onError(CloudMessages.from(done.getException()));
+                });
+            });
+            return;
+        }
+        db().runTransaction(t -> {
+            DocumentSnapshot b = t.get(bookRef(bookId));
+            if (!b.exists()) return "This book was removed from the catalogue.";
+            long out = number(b, "totalCopies") - number(b, "availableCopies");
+            if (changes.totalCopies < out) {
+                return out + " copies are reserved or on loan, so the total can't be less than " + out + ".";
+            }
+            Map<String, Object> m = bookFields(changes);
+            m.put("availableCopies", changes.totalCopies - out);
+            t.update(bookRef(bookId), m);
+            return null;
+        }).addOnCompleteListener(done -> {
+            if (!done.isSuccessful()) result.onError(CloudMessages.from(done.getException()));
+            else if (done.getResult() != null) result.onError(done.getResult());
+            else result.onSuccess(bookId);
+        });
+    }
+
+    private static Map<String, Object> bookFields(Book b) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("title", b.title);
+        m.put("author", b.author);
+        m.put("category", b.category);
+        m.put("shelf", b.shelf);
+        m.put("year", (long) b.year);
+        m.put("description", b.description);
+        m.put("totalCopies", (long) b.totalCopies);
+        m.put("updatedAt", System.currentTimeMillis());
+        return m;
+    }
+
+    /** Librarians: removes a book nobody holds or borrows. */
+    public static void deleteBook(final long bookId, final Result<Void> result) {
+        reservations().whereEqualTo("bookId", bookId).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                result.onError(CloudMessages.from(task.getException()));
+                return;
+            }
+            for (DocumentSnapshot d : task.getResult().getDocuments()) {
+                Reservation r = Reservation.from(d);
+                if (r.isActive() || r.isOnLoan()) {
+                    result.onError("Someone still has this book reserved or on loan. Remove it after it is returned.");
+                    return;
+                }
+            }
+            bookRef(bookId).delete().addOnCompleteListener(done -> {
+                if (done.isSuccessful()) result.onSuccess(null);
+                else result.onError(CloudMessages.from(done.getException()));
+            });
+        });
+    }
 }

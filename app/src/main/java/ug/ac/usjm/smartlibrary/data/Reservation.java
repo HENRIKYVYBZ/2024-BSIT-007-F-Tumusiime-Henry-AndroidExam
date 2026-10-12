@@ -31,6 +31,8 @@ public class Reservation {
     public final long createdAt;       // milliseconds since 1970
     public final String dueDate;       // yyyy-MM-dd, set when collected
     public final String handledBy;     // librarian who last changed it
+    public boolean walkIn;             // lent at the desk without a reservation
+    public String reminderSentOn;      // yyyy-MM-dd the librarian last asked for it back
 
     public Reservation(String id, long bookId, String bookTitle, String shelf, String userUid, String userName,
                        String idNumber, String role, String pickupDate, String status, long createdAt,
@@ -53,10 +55,13 @@ public class Reservation {
     public static Reservation from(DocumentSnapshot d) {
         Long book = d.getLong("bookId");
         Long created = d.getLong("createdAt");
-        return new Reservation(d.getId(), book == null ? -1 : book, d.getString("bookTitle"), d.getString("shelf"),
-                d.getString("userUid"), d.getString("userName"), d.getString("idNumber"), d.getString("role"),
-                d.getString("pickupDate"), d.getString("status"), created == null ? 0 : created,
+        Reservation r = new Reservation(d.getId(), book == null ? -1 : book, d.getString("bookTitle"),
+                d.getString("shelf"), d.getString("userUid"), d.getString("userName"), d.getString("idNumber"),
+                d.getString("role"), d.getString("pickupDate"), d.getString("status"), created == null ? 0 : created,
                 d.getString("dueDate"), d.getString("handledBy"));
+        r.walkIn = Boolean.TRUE.equals(d.getBoolean("walkIn"));
+        r.reminderSentOn = d.getString("reminderSentOn");
+        return r;
     }
 
     public boolean isActive() {

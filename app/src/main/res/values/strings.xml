@@ -219,6 +219,72 @@
     <string name="save_and_import">Save and import</string>
     <string name="save">Save</string>
 
+    <!-- Walk-in lending (librarians) -->
+    <string name="lend_a_book">＋ Lend a book</string>
+    <string name="lend_title">Lend a book</string>
+    <string name="lend_walk_in">Lend (walk-in)</string>
+    <string name="lend_by_scan">Scan the book\'s QR label</string>
+    <string name="lend_by_list">Choose from the books on the shelf</string>
+    <string name="choose_book">Choose a book</string>
+    <string name="nothing_to_lend">No book has a copy on the shelf right now.</string>
+    <string name="scan_prompt_lend">Scan the QR label on the book to lend</string>
+    <string name="scan_offer_lend">No one has reserved or borrowed this book (%1$s). Lend it to the reader at the desk?</string>
+    <string name="label_reader_id">Reader\'s registration number or staff ID</string>
+    <string name="hint_reader_id">e.g. 2023/BIT/0457 or ST-0123</string>
+    <string name="find_reader">Find</string>
+    <string name="lend_book">✓  Lend book</string>
+    <string name="lending">Lending…</string>
+    <string name="lend_due_line">Loan of %1$d days, due back %2$s</string>
+    <string name="no_copy_to_lend">There is no copy of this book on the shelf to lend.</string>
+    <string name="lent_title">Book lent</string>
+    <string name="lent_message">\"%1$s\" is on loan to %2$s.\n\nDue back: %3$s\nLoan code: %4$s</string>
+    <string name="desk_person_walk_in">%1$s  •  %2$s  •  #%3$s  •  walk-in</string>
+
+    <!-- Overdue reminders -->
+    <string name="send_reminder">Remind</string>
+    <string name="reminded_today">Reminded ✓</string>
+    <string name="reminder_sent_toast">%1$s will be reminded to return the book</string>
+    <string name="channel_return_name">Return reminders</string>
+    <string name="channel_return_description">Reminds you when a borrowed book is due back or overdue</string>
+    <string name="return_title">Library book due back</string>
+    <string name="return_today_text">\"%1$s\" is due back at the library today.</string>
+    <string name="return_tomorrow_text">\"%1$s\" is due back at the library tomorrow.</string>
+    <plurals name="return_overdue_text">
+        <item quantity="one">\"%1$s\" is %2$d day overdue. Please return it to the library.</item>
+        <item quantity="other">\"%1$s\" is %2$d days overdue. Please return it to the library.</item>
+    </plurals>
+    <string name="return_asked_text">The library has asked you to return \"%1$s\" (it was due %2$s).</string>
+
+    <!-- Add / edit books (librarians) -->
+    <string name="add_a_book">＋ Add a book</string>
+    <string name="add_book_title">Add a book</string>
+    <string name="edit_book_title">Edit book</string>
+    <string name="edit_book">Edit book</string>
+    <string name="librarian_tools">LIBRARIAN</string>
+    <string name="label_book_title">Title</string>
+    <string name="hint_book_title">e.g. Clean Code</string>
+    <string name="label_author">Author</string>
+    <string name="hint_author">e.g. Robert C. Martin</string>
+    <string name="hint_category">e.g. Programming</string>
+    <string name="hint_shelf">e.g. Level 1, Shelf A4</string>
+    <string name="hint_year">e.g. 2008</string>
+    <string name="label_copies">Copies</string>
+    <string name="hint_copies">e.g. 3</string>
+    <string name="hint_description">A sentence or two about the book</string>
+    <plurals name="copies_out_note">
+        <item quantity="one">%1$d copy is reserved or on loan right now.</item>
+        <item quantity="other">%1$d copies are reserved or on loan right now.</item>
+    </plurals>
+    <string name="save_book">Save book</string>
+    <string name="book_saved">Book saved. Every phone has the change.</string>
+    <string name="book_added">\"%1$s\" added (book #%2$d). Print its QR label from the book\'s page.</string>
+    <string name="delete_book">Remove from catalogue</string>
+    <string name="delete_book_title">Remove this book?</string>
+    <string name="delete_book_message">\"%1$s\" will disappear from every phone. This can\'t be undone.</string>
+    <string name="book_deleted">Book removed</string>
+    <string name="qr_label_description">QR label for this book</string>
+    <string name="qr_caption">Book #%1$d. Print this label or show it to the scanner.</string>
+
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>

@@ -1,0 +1,60 @@
+@startuml
+!include common.iuml
+left to right direction
+skinparam packageStyle rectangle
+title Use case diagram - USJM Smart Library Mobile
+actor "Reader" as R
+actor "Student" as S
+actor "Teaching staff\n(lecturer)" as TS
+actor "Non-teaching\nstaff" as NS
+actor "Librarian" as L
+actor "Administrator" as A
+actor "Firebase\n(Auth + Firestore)" as F
+actor "Library web\nsystem (Django)" as W
+S -|> R
+TS -|> R
+NS -|> R
+A -|> L
+rectangle "USJM Smart Library Mobile (Android app)" {
+  usecase "Create account\n(choose role)" as U1
+  usecase "Sign in / sign out" as U2
+  usecase "Reset password\nby email" as U3
+  usecase "Recover account:\nID number + recovery PIN" as U4
+  usecase "Browse & search\ncatalogue" as U5
+  usecase "Scan a book's\nQR label" as U6
+  usecase "Reserve a book\nfor pickup" as U7
+  usecase "Check role limits\n& pickup date" as U8
+  usecase "View / cancel my\nreservations & loans" as U9
+  usecase "Receive pickup &\nreturn reminders" as U10
+  usecase "Mark pickup Collected\nor No-show" as L1
+  usecase "Mark loan Returned" as L2
+  usecase "Lend a book to a\nwalk-in reader" as L3
+  usecase "Add / edit / remove\nbooks" as L4
+  usecase "Publish or import\nthe catalogue" as L5
+  usecase "Remind overdue\nborrowers" as L6
+  usecase "Approve staff accounts,\nchange roles, suspend" as A1
+}
+R --> U1
+R --> U2
+R --> U5
+R --> U7
+R --> U9
+R --> U10
+U3 .> U2 : <<extend>>
+U4 .> U2 : <<extend>>
+U6 .> U5 : <<extend>>
+U7 .> U8 : <<include>>
+L --> U2
+L --> L1
+L --> L2
+L --> L3
+L --> L4
+L --> L5
+L --> L6
+A --> A1
+U1 --> F
+U7 --> F
+L1 --> F
+A1 --> F
+L5 --> W
+@enduml

@@ -71,6 +71,9 @@ public class DeskActivity extends AppCompatActivity implements DeskAdapter.OnDes
     private boolean holdsLoaded, loansLoaded;
     private ListenerRegistration holdsListener, loansListener, catalogueListener;
 
+    /** True while the scanner was opened from "Lend a book". */
+    private boolean scanToLend = false;
+
     /** Set after scanning a book: only its holds and loans are shown (-1 = all books). */
     private long filterBookId = -1;
 
@@ -114,12 +117,10 @@ public class DeskActivity extends AppCompatActivity implements DeskAdapter.OnDes
         }
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_scan).setOnClickListener(v -> qrScanner.launch(new ScanOptions()
-                .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                .setPrompt(getString(R.string.scan_prompt_desk))
-                .setBeepEnabled(true)
-                .setOrientationLocked(false)));
+        findViewById(R.id.btn_scan).setOnClickListener(v -> startScan(false));
         findViewById(R.id.btn_catalogue).setOnClickListener(v -> showCatalogueMenu());
+        findViewById(R.id.btn_lend).setOnClickListener(v -> chooseBookToLend());
+        findViewById(R.id.btn_add_book).setOnClickListener(v -> startActivity(new Intent(this, BookEditActivity.class)));
         findViewById(R.id.btn_publish_samples).setOnClickListener(v -> confirmPublishSamples());
         findViewById(R.id.btn_import).setOnClickListener(v -> startImport());
         filterChip.setOnClickListener(v -> {
@@ -273,6 +274,11 @@ public class DeskActivity extends AppCompatActivity implements DeskAdapter.OnDes
     }
 
     @Override
+    public void onRemind(final Reservation r) {
+        CloudLibrary.sendReturnReminder(r, me.fullName, done(getString(R.string.reminder_sent_toast, r.userName)));
+    }
+
+    @Override
     public void onReturned(final Reservation r) {
         CloudLibrary.markReturned(r, me.fullName, done(getString(R.string.returned_toast, r.bookTitle)));
     }
@@ -306,30 +312,95 @@ public class DeskActivity extends AppCompatActivity implements DeskAdapter.OnDes
     }
 
     /** After scanning a label: show that book's holds and loans, on the tab that has them. */
+    private void startScan(boolean toLend) {
+        scanToLend = toLend;
+        qrScanner.launch(new ScanOptions()
+                .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                .setPrompt(getString(toLend ? R.string.scan_prompt_lend : R.string.scan_prompt_desk))
+                .setBeepEnabled(true)
+                .setOrientationLocked(false));
+    }
+
     private void onQrScanned(String text) {
+        boolean toLend = scanToLend;
+        scanToLend = false;
         if (text == null) return;
         long id = QrPayload.bookId(text);
-        if (id <= 0) {
+        final Book book = id > 0 ? LibraryRepository.get(this).getBook(id) : null;
+        if (book == null) {
             showMessage(getString(R.string.scan_unknown_title), getString(R.string.scan_unknown_message));
+            return;
+        }
+        if (toLend) {
+            openLend(book.id);
             return;
         }
         filterBookId = id;
         if (!forTab(TAB_PICKUPS).isEmpty()) selectTab(TAB_PICKUPS);
         else if (!forTab(TAB_OVERDUE).isEmpty()) selectTab(TAB_OVERDUE);
         else if (!forTab(TAB_LOANS).isEmpty()) selectTab(TAB_LOANS);
-        else selectTab(tab == TAB_STOCK ? TAB_PICKUPS : tab);
+        else {
+            // Nobody reserved or borrowed it: the reader at the desk probably wants to borrow it now.
+            selectTab(tab == TAB_STOCK ? TAB_PICKUPS : tab);
+            new AlertDialog.Builder(this)
+                    .setTitle(book.title)
+                    .setMessage(getString(R.string.scan_offer_lend, book.availabilityText()))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.lend_walk_in, (d, w) -> openLend(book.id))
+                    .show();
+        }
+    }
+
+    // --------------------------------------------------------------- walk-in
+
+    /** Lend a book: scan its label, or pick it from the books with a copy on the shelf. */
+    private void chooseBookToLend() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.lend_a_book)
+                .setItems(new String[]{getString(R.string.lend_by_scan), getString(R.string.lend_by_list)}, (d, which) -> {
+                    if (which == 0) startScan(true);
+                    else pickAvailableBook();
+                })
+                .show();
+    }
+
+    private void pickAvailableBook() {
+        final List<Book> available = new ArrayList<>();
+        for (Book b : LibraryRepository.get(this).getBooks("")) {
+            if (b.isAvailable()) available.add(b);
+        }
+        if (available.isEmpty()) {
+            showMessage(getString(R.string.lend_a_book), getString(R.string.nothing_to_lend));
+            return;
+        }
+        String[] titles = new String[available.size()];
+        for (int i = 0; i < titles.length; i++) {
+            titles[i] = available.get(i).title + "  (" + available.get(i).availableCopies + ")";
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.choose_book)
+                .setItems(titles, (d, which) -> openLend(available.get(which).id))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void openLend(long bookId) {
+        Intent i = new Intent(this, IssueActivity.class);
+        i.putExtra(IssueActivity.EXTRA_BOOK_ID, bookId);
+        startActivity(i);
     }
 
     // --------------------------------------------------------------- catalogue
 
     private void showCatalogueMenu() {
-        String[] items = {getString(R.string.import_from_server), getString(R.string.publish_samples),
-                getString(R.string.change_server)};
+        String[] items = {getString(R.string.add_a_book), getString(R.string.import_from_server),
+                getString(R.string.publish_samples), getString(R.string.change_server)};
         new AlertDialog.Builder(this)
                 .setTitle(R.string.catalogue_menu_title)
                 .setItems(items, (d, which) -> {
-                    if (which == 0) startImport();
-                    else if (which == 1) confirmPublishSamples();
+                    if (which == 0) startActivity(new Intent(this, BookEditActivity.class));
+                    else if (which == 1) startImport();
+                    else if (which == 2) confirmPublishSamples();
                     else askForServer(false);
                 })
                 .show();

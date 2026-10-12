@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Librarians: lend a book to a reader at the desk (walk-in, no reservation) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            style="@style/LibBackButton" />
+
+        <TextView
+            style="@style/LibHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text="@string/lend_title" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/lib_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- The book being lent -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/issue_book_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/lib_text"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/issue_book_shelf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lib_muted"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/issue_book_availability"
+                    style="@style/LibBadge"
+                    android:layout_marginTop="10dp" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/LibLabel"
+                android:layout_marginTop="22dp"
+                android:text="@string/label_reader_id" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/input_reader"
+                    style="@style/LibInput"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_reader_id"
+                    android:imeOptions="actionSearch"
+                    android:inputType="textCapCharacters|textNoSuggestions"
+                    android:maxLength="20" />
+
+                <Button
+                    android:id="@+id/btn_find"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/bg_button_secondary"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:stateListAnimator="@null"
+                    android:text="@string/find_reader"
+                    android:textAllCaps="false"
+                    android:textColor="@color/lib_navy"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/error_text"
+                style="@style/LibErrorBox" />
+
+            <!-- The reader, once found -->
+            <LinearLayout
+                android:id="@+id/reader_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/reader_avatar"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/reader_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/lib_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reader_role"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reader_due"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/lib_muted"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_lend"
+                style="@style/LibPrimaryButton"
+                android:layout_marginTop="24dp"
+                android:enabled="false"
+                android:text="@string/lend_book" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

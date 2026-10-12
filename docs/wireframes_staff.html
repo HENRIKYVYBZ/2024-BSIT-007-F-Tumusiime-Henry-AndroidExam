@@ -1,0 +1,64 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DejaVu Sans",Arial,sans-serif;background:#fff;color:#333;padding:28px 30px 20px;width:1475px}
+h1{font-size:22px;color:#0B2545;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:#777;margin-bottom:22px}
+.row{display:flex;align-items:flex-start;gap:0}
+.col{display:flex;flex-direction:column;align-items:center}
+.cap{font-size:14px;font-weight:700;color:#0B2545;margin-bottom:8px}
+.phone{width:300px;height:600px;border:3px solid #444;border-radius:30px;padding:12px 10px;background:#fafafa;position:relative}
+.scr{height:100%;border:1.5px solid #999;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.sb{height:14px;background:#bbb}
+.hdr{background:#d4d4d4;padding:10px;border-bottom:1.5px solid #999}
+.t{font-weight:700;font-size:14px;color:#222}
+.s{font-size:10px;color:#555;margin-top:2px}
+.box{border:1.5px dashed #888;border-radius:6px;background:#fff;font-size:11px;color:#777;padding:8px}
+.btn{border:2px solid #555;background:#9a9a9a;color:#fff;border-radius:7px;text-align:center;font-weight:700;font-size:12px;padding:10px}
+.pill{border:1.5px solid #555;border-radius:12px;font-size:9px;padding:3px 7px;background:#eee}
+.card{border:1.5px solid #999;border-radius:7px;padding:7px;margin:6px 8px 0;background:#fff}
+.l{height:8px;background:#999;border-radius:3px;margin:3px 0}
+.l2{height:6px;background:#cfcfcf;border-radius:3px;margin:3px 0}
+.badge{display:inline-block;border:1.5px solid #777;border-radius:8px;font-size:8px;padding:1px 6px;background:#eee}
+.lbl{font-size:9px;color:#555;font-weight:700;margin:9px 0 3px}
+.inp{border:1.5px solid #888;border-radius:5px;height:30px;font-size:10px;color:#999;padding:8px}
+.body{flex:1;padding:8px;background:#f2f2f2;overflow:hidden}
+.arrow{width:70px;align-self:center;display:flex;flex-direction:column;align-items:center;margin-top:30px}
+.arrow span{font-size:10px;color:#0B2545;text-align:center;margin-bottom:4px}
+.arrow svg{display:block}
+.note{font-size:11px;color:#444;width:300px;margin-top:10px;line-height:1.45}
+.num{display:inline-block;width:16px;height:16px;border-radius:50%;background:#E0A526;color:#0B2545;font-size:10px;font-weight:700;text-align:center;line-height:16px;margin-right:3px}
+</style></head><body><h1>Wireframes - staff screens and account recovery</h1><div class="sub">Low-fidelity layouts for librarians, administrators and the two-step "Forgot your email?" flow</div><div class="row"><div class="col"><div class="cap">5. Circulation desk (librarian)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="t">&larr; Circulation desk</div><div class="s">Mon, 12 Oct 2026</div></div><span class="pill"><span class="num">a</span>Catalogue</span><span class="pill">QR</span></div>
+ <div style="display:flex;gap:5px;margin-top:7px"><span class="pill"><span class="num">b</span>+ Lend a book</span><span class="pill">+ Add a book</span></div></div>
+ <div class="body" style="padding:0"><div style="display:flex;gap:4px;padding:7px 6px 0"><span class="pill" style="background:#777;color:#fff">Pickups 3</span><span class="pill">On loan 5</span><span class="pill">Overdue 1</span><span class="pill">Stock 2</span></div>
+ <div class="card"><div style="display:flex;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:60%"></div><span class="badge">TODAY</span></div><div class="l2" style="width:80%"></div><span class="badge">Student</span><div class="l2" style="width:65%"></div></div></div><div style="display:flex;gap:5px;margin-top:5px"><div class="pill" style="flex:1;text-align:center">No-show</div><div class="btn" style="flex:2;padding:5px;font-size:9px">Collected</div></div></div>
+ <div class="card"><div style="display:flex;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:60%"></div></div><div class="l2" style="width:80%"></div><span class="badge">Student</span><div class="l2" style="width:65%"></div></div></div><div style="display:flex;gap:5px;margin-top:5px"><div class="pill" style="flex:1;text-align:center">No-show</div><div class="btn" style="flex:2;padding:5px;font-size:9px">Collected</div></div></div>
+ <div class="card"><div style="display:flex;gap:6px"><div style="width:22px;height:22px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:60%"></div><span class="badge">Overdue</span></div><div class="l2" style="width:80%"></div><span class="badge">Student</span><div class="l2" style="width:65%"></div></div></div><div style="display:flex;gap:5px;margin-top:5px"><div class="pill" style="flex:1;text-align:center"><span class="num">c</span>Remind</div><div class="btn" style="flex:2;padding:5px;font-size:9px">Returned</div></div></div>
+ </div></div></div>
+<div class="note"><span class="num">a</span>publish sample books or import from the web system &nbsp;<span class="num">b</span>walk-in loans. Tabs filter holds and loans; QR shows only the scanned book. <span class="num">c</span>asks an overdue borrower to return the book.</div></div><div class="arrow"><span>Lend a<br>book</span><svg width="60" height="16"><line x1="0" y1="8" x2="50" y2="8" stroke="#0B2545" stroke-width="2"/><polygon points="50,2 60,8 50,14" fill="#0B2545"/></svg></div><div class="col"><div class="cap">6. Lend a book (walk-in)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; Lend a book</div></div>
+ <div class="body"><div class="box" style="border-style:solid;background:#fff"><div class="l" style="width:80%"></div><div class="l2" style="width:60%"></div><span class="badge" style="margin-top:6px">2 of 3 available</span></div>
+  <div class="lbl">READER'S REGISTRATION NUMBER OR STAFF ID</div>
+  <div style="display:flex;gap:6px"><div class="inp" style="flex:1;background:#fff">2023/BIT/0457</div><div class="pill" style="padding:8px 10px"><span class="num">d</span>Find</div></div>
+  <div class="box" style="border-style:solid;background:#fff;margin-top:12px;display:flex;gap:8px;align-items:center"><div style="width:30px;height:30px;border-radius:50%;background:#bbb"></div><div style="flex:1"><div class="l" style="width:70%"></div><span class="badge">Student</span><div class="l2" style="width:80%;margin-top:4px"></div></div></div>
+  <div class="btn" style="margin-top:20px"><span class="num">e</span>Lend book</div>
+ </div></div></div>
+<div class="note"><span class="num">d</span>looks up the account by ID; the librarian checks the name and role. <span class="num">e</span>starts a loan (14 or 30 days) that appears in the reader's My reservations.</div></div><div style="width:40px"></div><div class="col"><div class="cap">7. Manage users (administrator)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; Manage users</div></div>
+ <div class="body" style="padding:0"><div style="display:flex;gap:6px;padding:8px"><span class="pill" style="flex:1;text-align:center;background:#777;color:#fff">Waiting (2)</span><span class="pill" style="flex:1;text-align:center">All users (14)</span></div>
+ <div class="inp" style="margin:0 8px;background:#fff"><span class="num">f</span>Search name, email or ID</div>
+ <div class="card" style="border:2px solid #888;"><div style="display:flex;gap:6px"><div style="width:24px;height:24px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:55%"></div><span class="badge">Waiting</span></div><span class="badge">Teaching staff</span><div class="l2" style="width:85%;margin-top:3px"></div></div></div><div style="display:flex;gap:5px;margin-top:5px"><div class="pill" style="flex:1;text-align:center">Reject</div><div class="btn" style="flex:2;padding:5px;font-size:9px"><span class="num">g</span>Approve</div></div></div><div class="card" style="border:2px solid #888;"><div style="display:flex;gap:6px"><div style="width:24px;height:24px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:55%"></div><span class="badge">Waiting</span></div><span class="badge">Teaching staff</span><div class="l2" style="width:85%;margin-top:3px"></div></div></div><div style="display:flex;gap:5px;margin-top:5px"><div class="pill" style="flex:1;text-align:center">Reject</div><div class="btn" style="flex:2;padding:5px;font-size:9px"><span class="num">g</span>Approve</div></div></div><div class="card" style=""><div style="display:flex;gap:6px"><div style="width:24px;height:24px;border-radius:50%;background:#bbb;flex:none"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><div class="l" style="width:55%"></div><span class="badge">Active</span></div><span class="badge">Teaching staff</span><div class="l2" style="width:85%;margin-top:3px"></div></div></div></div>
+ </div></div></div>
+<div class="note"><span class="num">f</span>filters accounts &nbsp;<span class="num">g</span>approves a staff account in one tap. Tapping a card offers Change role (e.g. Librarian) and Suspend / Restore.</div></div><div style="width:40px"></div><div class="col"><div class="cap">8. Forgot your email? (2 steps)</div>
+<div class="phone"><div class="scr"><div class="sb"></div>
+ <div class="hdr"><div class="t">&larr;&nbsp; Find your account</div></div>
+ <div class="body"><div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:#777;color:#fff;font-size:10px;text-align:center;line-height:20px">&#10003;</div><div style="flex:1;height:3px;background:#777"></div><div style="width:20px;height:20px;border-radius:50%;background:#555;color:#fff;font-size:10px;text-align:center;line-height:20px">2</div></div>
+  <div class="t" style="margin-top:12px">Step 2: Your recovery PIN</div><div class="l2" style="width:90%;margin-top:4px"></div>
+  <div class="lbl">RECOVERY PIN</div><div class="inp" style="background:#fff;text-align:center;letter-spacing:6px;font-size:14px;color:#333;padding:6px">&#9679; &#9679; &#9679; &#9679; &#9679; &#9679;</div>
+  <div class="btn" style="margin-top:16px"><span class="num">h</span>Verify</div>
+  <div class="box" style="border-style:solid;margin-top:12px;background:#fff"><div class="lbl" style="margin-top:0">YOUR ACCOUNT EMAIL</div><div class="l" style="width:75%"></div><div class="pill" style="text-align:center;margin-top:6px"><span class="num">i</span>Send password reset link</div></div>
+ </div></div></div>
+<div class="note">Step 1 asks for the registration number or staff ID. <span class="num">h</span>checks ID + PIN (5 tries, then a 15-minute lock). <span class="num">i</span>appears only when both match.</div></div></div></body></html>

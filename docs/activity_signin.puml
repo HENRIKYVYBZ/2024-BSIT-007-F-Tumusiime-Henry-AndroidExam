@@ -1,0 +1,51 @@
+@startuml
+!include common.iuml
+title Activity diagram - Sign in, create account and recover access
+start
+:Open the app;
+if (Already signed in on this phone?) then (yes)
+else (no)
+  :Show Sign in screen;
+  if (Has an account?) then (no)
+    :Tap "Create an account";
+    repeat
+      :Choose role (student / teaching / non-teaching);\nenter name, reg. no. or staff ID, email,\npassword (twice), recovery PIN (twice);
+    repeat while (All fields valid?) is (no: error shown\nnext to each field)
+    ->yes;
+    :Firebase Authentication creates the account;
+    :Save profile in Firestore\n(staff wait for approval);
+  else (yes)
+    if (Remembers the email?) then (no)
+      :"Forgot your email?":\nstep 1 ID number, step 2 recovery PIN;
+      if (Both match?) then (yes)
+        :Show the account email;\noffer a password-reset link;
+      else (no)
+        :"No match" (5 tries, then 15-minute lock);
+        stop
+      endif
+    else (yes)
+    endif
+    if (Remembers the password?) then (no)
+      :"Forgot password?":\nFirebase emails a reset link;
+    else (yes)
+    endif
+    repeat
+      :Enter email and password;
+      :Firebase checks them;
+    repeat while (Correct?) is (no: "Incorrect email\nor password")
+    ->yes;
+  endif
+endif
+:Load profile and role from Firestore;
+if (Suspended?) then (yes)
+  :Sign out with an explanation;
+  stop
+else (no)
+endif
+if (Librarian?) then (yes)
+  :Open the circulation desk;
+else (no)
+  :Open the catalogue\n(role badge and tools);
+endif
+stop
+@enduml

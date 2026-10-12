@@ -54,6 +54,31 @@
             android:src="@drawable/ic_qr_scan" />
     </LinearLayout>
 
+    <!-- Desk actions -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingBottom="12dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_lend"
+                style="@style/LibHeaderPill"
+                android:text="@string/lend_a_book" />
+
+            <TextView
+                android:id="@+id/btn_add_book"
+                style="@style/LibHeaderPill"
+                android:text="@string/add_a_book" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

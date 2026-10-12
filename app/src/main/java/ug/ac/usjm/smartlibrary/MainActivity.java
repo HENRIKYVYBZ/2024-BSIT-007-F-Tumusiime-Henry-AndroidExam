@@ -37,6 +37,8 @@ import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
 import ug.ac.usjm.smartlibrary.data.UserDirectory;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
+import ug.ac.usjm.smartlibrary.data.Reservation;
+import ug.ac.usjm.smartlibrary.notify.LoanReminders;
 import ug.ac.usjm.smartlibrary.notify.PickupReminders;
 import ug.ac.usjm.smartlibrary.util.QrPayload;
 import ug.ac.usjm.smartlibrary.util.Roles;
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         refreshProfile(user);
 
         PickupReminders.createChannel(this);
+        LoanReminders.createChannel(this);
         askForNotificationPermissionOnce();
 
         repo = LibraryRepository.get(this);
@@ -231,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
                 Session.set(MainActivity.this, p);
                 showProfile(p);
                 openDeskForLibrarian(p);
+                checkMyLoans(p.uid);
             }
 
             @Override
@@ -241,6 +245,25 @@ public class MainActivity extends AppCompatActivity {
                     accountBanner.setText(getString(R.string.profile_not_loaded, message));
                     accountBanner.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+    }
+
+    /** Reminders for this person's holds and loans: due tomorrow, overdue, or asked back by the library. */
+    private void checkMyLoans(String uid) {
+        CloudLibrary.getMine(uid, new CloudLibrary.Result<List<Reservation>>() {
+            @Override
+            public void onSuccess(List<Reservation> mine) {
+                for (Reservation r : mine) {
+                    PickupReminders.sync(MainActivity.this, r);
+                    LoanReminders.sync(MainActivity.this, r);
+                }
+                LoanReminders.check(MainActivity.this, mine);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Offline: the alarms already scheduled still work.
             }
         });
     }
@@ -293,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth.getInstance().signOut();
         Session.clear(this);
         PickupReminders.clearAll(this);
+        LoanReminders.clearAll(this);
         new AlertDialog.Builder(this)
                 .setTitle(R.string.suspended_title)
                 .setMessage(R.string.suspended_message)
@@ -321,6 +345,7 @@ public class MainActivity extends AppCompatActivity {
                     FirebaseAuth.getInstance().signOut();
                     Session.clear(this);
                     PickupReminders.clearAll(this);
+                    LoanReminders.clearAll(this);
                     deskOpenedThisLaunch = false;
                     goToLogin();
                 })

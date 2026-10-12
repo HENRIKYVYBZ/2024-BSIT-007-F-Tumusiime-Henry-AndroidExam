@@ -1,0 +1,58 @@
+@startuml
+!include common.iuml
+skinparam ClassBackgroundColor #EEF2F8
+skinparam ClassBorderColor #0B2545
+skinparam ClassHeaderBackgroundColor #0B2545
+skinparam ClassFontColor #FFFFFF
+hide circle
+hide methods
+title Data design - Cloud Firestore (shared) and SQLite (on the phone)
+left to right direction
+entity "users/{uid}" as U {
+  * uid : Firebase Auth id
+  --
+  fullName, email
+  role : student | teaching_staff |
+         non_teaching_staff | librarian | admin
+  idNumber : reg. no. or staff ID
+  approved : bool
+  suspended : bool
+  recoveryKey : SHA-256(ID + PIN)
+  createdAt : ms
+}
+entity "books/{bookId}" as B {
+  * bookId : number
+  --
+  title, author, category, shelf
+  year, description
+  totalCopies : >= 1
+  availableCopies : 0..total
+  lastReservation : hold id
+}
+entity "reservations/{id}" as R {
+  * id : auto id (code = first 6)
+  --
+  bookId, bookTitle, shelf
+  userUid, userName, idNumber, role
+  pickupDate : yyyy-MM-dd
+  status : ACTIVE | COLLECTED | RETURNED |
+           CANCELLED | NO_SHOW | EXPIRED
+  dueDate, collectedOn, returnedOn
+  walkIn, reminderSentOn, handledBy
+}
+entity "recovery/{key}" as K {
+  * key : SHA-256(ID number + PIN)
+  --
+  uid, email
+}
+entity "SQLite: books\n(offline cache)" as S {
+  * id : INTEGER PK
+  --
+  title, author, category, shelf, year,
+  description, total_copies, available_copies
+}
+U ||--o{ R : "makes"
+B ||--o{ R : "is held / lent in"
+U ||--o| K : "can be found by"
+B ..> S : "copied to every phone\n(live listener)"
+@enduml

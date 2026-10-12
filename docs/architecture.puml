@@ -1,0 +1,33 @@
+@startuml
+!include common.iuml
+skinparam ComponentBackgroundColor #EEF2F8
+skinparam ComponentBorderColor #0B2545
+skinparam NodeBackgroundColor #FFFFFF
+skinparam NodeBorderColor #0B2545
+title Architecture - USJM Smart Library Mobile
+node "Android phone (Java app)" {
+  [Screens (Activities)\nLogin, Catalogue, Book details,\nReserve, My reservations,\nDesk, Lend, Edit book, Manage users] as UI
+  [Rules & helpers (plain Java)\nValidator, Roles, Loans,\nBookValidator, RecoveryKey] as RULES
+  [Data layer\nCloudLibrary, UserDirectory,\nAccountRecovery, LibraryRepository] as DATA
+  [Reminders\nAlarmManager + notifications] as NOTIFY
+  database "SQLite\n(catalogue cache)" as SQL
+  [ZXing\nQR scan / labels] as QR
+}
+cloud "Firebase (Google Cloud)" {
+  [Authentication\n(email + password)] as AUTH
+  database "Cloud Firestore\nusers, books,\nreservations, recovery" as FS
+  [Security rules\n(firestore.rules)] as SR
+}
+node "Laptop on the same Wi-Fi" {
+  [USJM Smart Library\nweb system (Django)\nGET /api/books/] as WEB
+}
+UI --> RULES : validate input
+UI --> DATA
+UI --> QR
+UI --> NOTIFY
+DATA --> SQL : read / cache
+DATA --> FS : listeners, transactions
+UI --> AUTH : sign in / up / reset
+FS -- SR
+DATA ..> WEB : librarian imports\nthe catalogue (HTTP)
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+!include common.iuml
+title Activity diagram - Librarian at the circulation desk
+start
+:Librarian signs in;\nthe desk opens with today's date;
+repeat
+  switch (Task at the desk?)
+  case (Pickup)
+    :Find the hold in the Pickups tab\n(TODAY flagged, or scan the label);
+    if (Reader collects?) then (yes)
+      :Collected -> loan with due date\n(14 days students, 30 staff);
+    else (no)
+      :No-show -> copy back on the shelf;
+    endif
+  case (Walk-in loan)
+    :Lend a book: scan the label\nor pick from the shelf list;
+    :Type the reader's ID number,\ncheck the name and role;
+    :Lend -> loan with due date;
+  case (Return)
+    :Find the loan (On loan / Overdue, or scan);
+    :Returned -> copy back on the shelf;
+  case (Overdue)
+    :Overdue tab: Remind -> the borrower\nis notified when the app opens;
+  case (Stock)
+    :Stock tab: books with 0-1 copies left;
+    :Add / edit a book, or import the\ncatalogue from the web system;
+  endswitch
+  :Every phone sees the change at once\n(Firestore listeners);
+repeat while (More readers?) is (yes)
+->no;
+stop
+@enduml

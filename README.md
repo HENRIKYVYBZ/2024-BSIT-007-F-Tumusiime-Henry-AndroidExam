@@ -19,7 +19,10 @@ Library Management System.
 | Book details | Shelf location, subject, year, description and availability; Reserve button (disabled when no copies are left) |
 | Reserve | Form with full name, registration number or staff ID and pickup date (calendar); validates every field; saves the reservation to Cloud Firestore in one transaction, so the last copy can never go to two people |
 | My reservations | Live list of holds and loans (Active / On loan with due date / Overdue / Returned / Cancelled / Not collected / Expired); cancel with confirmation, which puts the copy back on the shelf |
-| Circulation desk (librarians) | Tabs for Pickups, On loan, Overdue and Stock; mark a hold **Collected** (starts a loan with a due date) or **No-show**, and a loan **Returned**; scan a book's QR label to see only that book's holds and loans; publish the shared catalogue (sample books, or import from the web system's REST API) |
+| Circulation desk (librarians) | Tabs for Pickups, On loan, Overdue and Stock; mark a hold **Collected** (starts a loan with a due date) or **No-show**, and a loan **Returned**; scan a book's QR label to see only that book's holds and loans; publish the shared catalogue (sample books, or import from the web system's REST API); **Remind** overdue borrowers |
+| Lend a book (librarians) | Walk-in loans without a reservation: scan the book's QR label (or pick it from the shelf list), type the reader's registration number or staff ID, check the name, tap **Lend** |
+| Add / edit book (librarians) | Add a new title or edit one (all fields validated); change the number of copies (never below the copies that are out); remove a book nobody holds; each book page shows its QR label |
+| Return reminders | 08:00 alarm on the due date, and on opening the app a notification for books due tomorrow, overdue, or asked back by the librarian |
 | Manage users (administrators) | Approve staff accounts, reject a staff request, change anyone's role (e.g. make a librarian), suspend or restore an account; search by name, email or ID |
 
 ## User roles
@@ -96,7 +99,6 @@ The registration number format accepted is `2023/BIT/0457` (or `USJM/23/BIT/045`
 
 ## Planned for the final submission
 
-- Circulation desk extras: walk-in issue, add and edit books, overdue reminders
 - Teaching staff: book recommendations and course reading lists; administrator statistics
 - Full test plan and a signed release APK
 

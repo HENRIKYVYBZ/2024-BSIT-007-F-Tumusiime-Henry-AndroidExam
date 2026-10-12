@@ -81,12 +81,13 @@ service cloud.firestore {
 
       // You can only reserve for yourself, with your real role, and only by taking a copy
       // off the shelf in the same transaction. A new reservation always starts ACTIVE.
-      allow create: if active()
+      // Librarians also create loans directly for walk-in readers.
+      allow create: if isLibrarian() || (active()
         && request.resource.data.userUid == request.auth.uid
         && request.resource.data.status == 'ACTIVE'
         && request.resource.data.role == effectiveRole()
         && getAfter(/databases/$(database)/documents/books/$(string(request.resource.data.bookId))).data.availableCopies
-           == get(/databases/$(database)/documents/books/$(string(request.resource.data.bookId))).data.availableCopies - 1;
+           == get(/databases/$(database)/documents/books/$(string(request.resource.data.bookId))).data.availableCopies - 1);
 
       // You may cancel your own waiting hold (or let it expire). Only librarians mark
       // Collected, No-show or Returned.

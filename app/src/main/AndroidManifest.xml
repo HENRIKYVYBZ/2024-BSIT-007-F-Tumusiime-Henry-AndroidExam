@@ -81,6 +81,19 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- Librarians: lend a book at the desk, add or edit a book -->
+        <activity
+            android:name=".IssueActivity"
+            android:exported="false"
+            android:parentActivityName=".DeskActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".BookEditActivity"
+            android:exported="false"
+            android:parentActivityName=".DeskActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
         <!-- QR scanner screen from the ZXing library: allow portrait as well as landscape -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
@@ -90,6 +103,11 @@
         <!-- Shows pickup reminders when this app's alarm goes off -->
         <receiver
             android:name=".notify.PickupReminderReceiver"
+            android:exported="false" />
+
+        <!-- Shows "due back today" when a loan's alarm goes off -->
+        <receiver
+            android:name=".notify.LoanReminderReceiver"
             android:exported="false" />
 
         <!-- Restores pickup reminders after the phone restarts (only the system sends BOOT_COMPLETED) -->

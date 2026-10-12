@@ -31,6 +31,8 @@ public class DeskAdapter extends BaseAdapter {
         void onNoShow(Reservation r);
 
         void onReturned(Reservation r);
+
+        void onRemind(Reservation r);
     }
 
     private final Context context;
@@ -94,9 +96,11 @@ public class DeskAdapter extends BaseAdapter {
         RoleStyle.applyAvatar(h.avatar, r.userName, r.role);
         RoleStyle.applyBadge(h.role, r.role, false);
         h.title.setText(r.bookTitle);
-        h.person.setText(context.getString(R.string.desk_person, r.userName, r.idNumber, r.code()));
+        h.person.setText(context.getString(r.walkIn ? R.string.desk_person_walk_in : R.string.desk_person,
+                r.userName, r.idNumber, r.code()));
         h.when.setTextColor(ContextCompat.getColor(context, R.color.lib_muted));
 
+        h.secondary.setEnabled(true);
         if (r.isActive()) {
             boolean isToday = today.equals(r.pickupDate);
             h.when.setText(context.getString(R.string.pickup_on, DateText.pretty(r.pickupDate), r.shelf));
@@ -113,12 +117,18 @@ public class DeskAdapter extends BaseAdapter {
                         DateText.pretty(r.dueDate)));
                 h.when.setTextColor(ContextCompat.getColor(context, R.color.lib_red));
                 showFlag(h.flag, R.string.status_overdue, R.drawable.bg_badge_red, R.color.lib_red);
+                // Ask the borrower to bring it back (they see it on their phone). Once a day.
+                boolean sentToday = today.equals(r.reminderSentOn);
+                h.secondary.setVisibility(View.VISIBLE);
+                h.secondary.setEnabled(!sentToday);
+                h.secondary.setText(sentToday ? R.string.reminded_today : R.string.send_reminder);
+                h.secondary.setOnClickListener(v -> listener.onRemind(r));
             } else {
                 h.when.setText(context.getString(R.string.due_back_on,
                         r.dueDate == null ? "" : DateText.pretty(r.dueDate)));
                 showFlag(h.flag, 0, 0, 0);
+                h.secondary.setVisibility(View.GONE);
             }
-            h.secondary.setVisibility(View.GONE);
             h.primary.setText(R.string.mark_returned);
             h.primary.setOnClickListener(v -> listener.onReturned(r));
         }

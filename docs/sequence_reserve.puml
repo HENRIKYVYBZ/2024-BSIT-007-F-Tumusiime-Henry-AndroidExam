@@ -1,0 +1,40 @@
+@startuml
+!include common.iuml
+title Sequence diagram - Reserve a book (shared data in Cloud Firestore)
+actor Reader
+participant "ReserveActivity" as UI
+participant "Validator\n+ Roles" as V
+participant "CloudLibrary" as C
+database "Cloud Firestore\nbooks / reservations" as FS
+participant "PickupReminders\n(AlarmManager)" as N
+Reader -> UI : fill name, ID number, pickup date\ntap "Confirm reservation"
+activate UI
+UI -> V : nameError(), idNumberError(role, id),\npickupDateError(date, today, maxDays)
+V --> UI : null (valid) or a message
+alt a field is invalid
+  UI --> Reader : error shown on the field
+else all fields valid
+  UI -> C : reserve(book, profile, name, id, date, maxActive)
+  activate C
+  C -> FS : query reservations where userUid = me
+  FS --> C : my holds and loans
+  alt duplicate or hold limit reached
+    C --> UI : onError(reason)
+    UI --> Reader : dialog "Could not reserve"
+  else limits OK
+    C -> FS : runTransaction:\nget books/{id}; availableCopies > 0?
+    alt no copy left
+      C --> UI : onError("All copies are out")
+    else copy available
+      C -> FS : update availableCopies - 1\nset reservations/{new} (ACTIVE)
+      note right of FS : security rules check the role,\nthe owner and that exactly\none copy was taken
+      FS --> C : committed
+      C --> UI : onSuccess(reservation)
+      deactivate C
+      UI -> N : schedule(08:00 on pickup day)
+      UI --> Reader : dialog "Book reserved"\n(date, shelf, code)
+    end
+  end
+end
+deactivate UI
+@enduml
