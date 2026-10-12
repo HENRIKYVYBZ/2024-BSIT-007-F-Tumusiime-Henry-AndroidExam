@@ -156,8 +156,49 @@
                 style="@style/LibInput"
                 android:autofillHints="newPassword"
                 android:hint="@string/hint_confirm_password"
-                android:imeOptions="actionDone"
+                android:imeOptions="actionNext"
                 android:inputType="textPassword" />
+
+            <!-- Two-step account recovery: ID number + this PIN find the account if the email is forgotten -->
+            <TextView
+                style="@style/LibLabel"
+                android:layout_marginTop="22dp"
+                android:text="@string/label_recovery_pin" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/recovery_pin_signup_note"
+                android:textColor="@color/lib_muted"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/input_pin"
+                    style="@style/LibInput"
+                    android:layout_width="0dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_pin"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberPassword"
+                    android:maxLength="6" />
+
+                <EditText
+                    android:id="@+id/input_confirm_pin"
+                    style="@style/LibInput"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_pin_again"
+                    android:imeOptions="actionDone"
+                    android:inputType="numberPassword"
+                    android:maxLength="6" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btn_create"

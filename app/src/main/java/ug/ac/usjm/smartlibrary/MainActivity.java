@@ -82,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
         accountBanner = (TextView) findViewById(R.id.account_banner);
         greeting.setText(getString(R.string.greeting, firstName(user)));
         findViewById(R.id.btn_sign_out).setOnClickListener(v -> confirmSignOut());
+        // Tap your name to set or change the recovery PIN.
+        greeting.setOnClickListener(v -> startActivity(new Intent(this, SetRecoveryPinActivity.class)));
+        findViewById(R.id.recovery_banner).setOnClickListener(v ->
+                startActivity(new Intent(this, SetRecoveryPinActivity.class)));
         findViewById(R.id.btn_manage_users).setOnClickListener(v ->
                 startActivity(new Intent(this, AdminActivity.class)));
 
@@ -149,6 +153,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (adapter == null) return;   // redirected to the sign-in screen
         loadBooks();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        // Back from setting the recovery PIN: hide the banner.
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && roleBadge != null) showProfile(Session.get(this, user.getUid()));
     }
 
     @Override
@@ -288,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!p.firstName().isEmpty()) greeting.setText(getString(R.string.greeting, p.firstName()));
         RoleStyle.applyBadge(roleBadge, p.role, p.isWaitingForApproval());
+        findViewById(R.id.recovery_banner).setVisibility(p.hasRecoveryPin() ? View.GONE : View.VISIBLE);
         roleBadge.setVisibility(View.VISIBLE);
 
         if (p.isWaitingForApproval()) {

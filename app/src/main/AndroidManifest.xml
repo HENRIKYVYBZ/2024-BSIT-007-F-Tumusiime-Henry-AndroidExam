@@ -43,6 +43,19 @@
             android:exported="false"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
+        <!-- Forgot your email? (two-step recovery) and setting the recovery PIN -->
+        <activity
+            android:name=".RecoverAccountActivity"
+            android:exported="false"
+            android:parentActivityName=".LoginActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".SetRecoveryPinActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
         <!-- Screen 1: Catalogue (after sign-in) -->
         <activity
             android:name=".MainActivity"

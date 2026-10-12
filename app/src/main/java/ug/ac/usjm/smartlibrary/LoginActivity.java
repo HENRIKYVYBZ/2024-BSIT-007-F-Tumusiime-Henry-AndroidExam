@@ -49,6 +49,23 @@ public class LoginActivity extends AppCompatActivity {
         });
         findViewById(R.id.link_sign_up).setOnClickListener(v ->
                 startActivity(new Intent(this, SignUpActivity.class)));
+        findViewById(R.id.link_forgot_email).setOnClickListener(v ->
+                startActivity(new Intent(this, RecoverAccountActivity.class)));
+        fillEmailFrom(getIntent());
+    }
+
+    /** Coming back from "Forgot your email?" with the account's email: type it in for the person. */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        fillEmailFrom(intent);
+    }
+
+    private void fillEmailFrom(Intent intent) {
+        String email = intent == null ? null : intent.getStringExtra(ForgotPasswordActivity.EXTRA_EMAIL);
+        if (email == null || emailInput == null) return;
+        emailInput.setText(email);
+        passwordInput.requestFocus();
     }
 
     private void signIn() {

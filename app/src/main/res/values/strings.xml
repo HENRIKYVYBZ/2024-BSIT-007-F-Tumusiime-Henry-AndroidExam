@@ -285,6 +285,37 @@
     <string name="qr_label_description">QR label for this book</string>
     <string name="qr_caption">Book #%1$d. Print this label or show it to the scanner.</string>
 
+    <!-- Two-step account recovery (forgot your email?) -->
+    <string name="forgot_email">Forgot your email?</string>
+    <string name="recover_title">Find your account</string>
+    <string name="recover_step1_heading">Step 1: Who are you?</string>
+    <string name="recover_step1_intro">Type the registration number or staff ID you signed up with.</string>
+    <string name="recover_step2_heading">Step 2: Your recovery PIN</string>
+    <string name="recover_step2_intro">Enter the 6-digit recovery PIN you chose for %1$s.</string>
+    <string name="recover_found_heading">Account found</string>
+    <string name="recover_found_intro">This is the email you signed up with. Sign in with it, or send yourself a link to choose a new password.</string>
+    <string name="your_account_email">YOUR ACCOUNT EMAIL</string>
+    <string name="send_reset_to_email">Send password reset link</string>
+    <string name="reset_link_sent">✓ Reset link sent. Check your inbox</string>
+    <string name="next">Next</string>
+    <string name="verify">Verify</string>
+    <string name="no_pin_help">No recovery PIN, or forgot it? Visit the library desk with your student or staff ID card. The administrator can find your account for you.</string>
+    <string name="pin_six_digits">Enter the 6 digits</string>
+    <string name="recover_no_match">That ID and PIN don\'t match any account. %1$d tries left.</string>
+    <string name="recover_locked">Too many wrong tries. Please wait %1$d minutes, or visit the library desk.</string>
+    <string name="label_recovery_pin">Recovery PIN</string>
+    <string name="recovery_pin_signup_note">6 digits you\'ll remember. With your registration number or staff ID it finds your account if you ever forget your email.</string>
+    <string name="hint_pin">6 digits</string>
+    <string name="hint_pin_again">Same 6 digits</string>
+    <string name="set_recovery_pin">Set recovery PIN</string>
+    <string name="change_recovery_pin">Change recovery PIN</string>
+    <string name="recovery_pin_intro">If you ever forget which email you signed up with, \"Forgot your email?\" on the sign-in screen asks for two things: your registration number or staff ID, and this PIN. Choose 6 digits that are not easy to guess.</string>
+    <string name="label_new_pin">New PIN</string>
+    <string name="label_confirm_pin">Confirm PIN</string>
+    <string name="save_pin">Save PIN</string>
+    <string name="recovery_pin_saved">Recovery PIN saved</string>
+    <string name="recovery_banner">🔒 Set a recovery PIN so you can find your account if you forget your email. Tap to set it up.</string>
+
     <!-- Errors -->
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>

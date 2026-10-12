@@ -18,8 +18,11 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import ug.ac.usjm.smartlibrary.auth.AuthMessages;
 import ug.ac.usjm.smartlibrary.auth.PasswordToggle;
 import ug.ac.usjm.smartlibrary.auth.Session;
+import ug.ac.usjm.smartlibrary.data.AccountRecovery;
+import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.UserDirectory;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
+import ug.ac.usjm.smartlibrary.util.RecoveryKey;
 import ug.ac.usjm.smartlibrary.util.Roles;
 import ug.ac.usjm.smartlibrary.util.Validator;
 
@@ -32,7 +35,7 @@ import ug.ac.usjm.smartlibrary.util.Validator;
 public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
-    private EditText nameInput, idInput, emailInput, passwordInput, confirmInput;
+    private EditText nameInput, idInput, emailInput, passwordInput, confirmInput, pinInput, confirmPinInput;
     private TextView errorText, idLabel, staffNote;
     private RadioGroup roleGroup;
     private Button createButton;
@@ -51,6 +54,8 @@ public class SignUpActivity extends AppCompatActivity {
         emailInput = (EditText) findViewById(R.id.input_email);
         passwordInput = (EditText) findViewById(R.id.input_password);
         confirmInput = (EditText) findViewById(R.id.input_confirm);
+        pinInput = (EditText) findViewById(R.id.input_pin);
+        confirmPinInput = (EditText) findViewById(R.id.input_confirm_pin);
         errorText = (TextView) findViewById(R.id.error_text);
         createButton = (Button) findViewById(R.id.btn_create);
 
@@ -85,15 +90,18 @@ public class SignUpActivity extends AppCompatActivity {
         final String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString();
         String confirm = confirmInput.getText().toString();
+        final String pin = pinInput.getText().toString().trim();
 
         // Check every field and show each problem next to its field.
-        EditText[] fields = {nameInput, idInput, emailInput, passwordInput, confirmInput};
+        EditText[] fields = {nameInput, idInput, emailInput, passwordInput, confirmInput, pinInput, confirmPinInput};
         String[] errors = {
                 Validator.nameError(name),
                 Validator.idNumberError(role, idNumber),
                 Validator.emailError(email),
                 Validator.newPasswordError(password),
-                Validator.confirmPasswordError(password, confirm)};
+                Validator.confirmPasswordError(password, confirm),
+                RecoveryKey.pinError(pin),
+                RecoveryKey.confirmPinError(pin, confirmPinInput.getText().toString())};
         EditText firstBad = null;
         for (int i = 0; i < fields.length; i++) {
             fields[i].setError(errors[i]);
@@ -120,12 +128,25 @@ public class SignUpActivity extends AppCompatActivity {
             user.sendEmailVerification();
 
             // Remember the profile on the phone first, so it is not lost if the cloud save fails.
-            UserProfile profile = UserProfile.newAccount(user.getUid(), name, email, role, idNumber);
+            final UserProfile profile = UserProfile.newAccount(user.getUid(), name, email, role, idNumber);
             Session.set(this, profile);
             UserDirectory.create(profile, new UserDirectory.Result<UserProfile>() {
                 @Override
                 public void onSuccess(UserProfile saved) {
-                    finishSignUp(email, null);
+                    // Two-step recovery: ID number + PIN will find this email if it is ever forgotten.
+                    AccountRecovery.save(profile.uid, email, idNumber, pin, null, new CloudLibrary.Result<String>() {
+                        @Override
+                        public void onSuccess(String key) {
+                            profile.recoveryKey = key;
+                            Session.set(SignUpActivity.this, profile);
+                            finishSignUp(email, null);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            finishSignUp(email, message);   // the catalogue offers to set the PIN again
+                        }
+                    });
                 }
 
                 @Override

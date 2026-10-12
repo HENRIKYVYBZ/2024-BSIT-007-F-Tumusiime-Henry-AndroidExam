@@ -201,6 +201,23 @@
             android:textSize="13sp"
             android:visibility="gone" />
 
+        <!-- Shown until the person sets a recovery PIN -->
+        <TextView
+            android:id="@+id/recovery_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/bg_notice_box"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="12dp"
+            android:text="@string/recovery_banner"
+            android:textColor="@color/lib_notice"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/result_count"
             android:layout_width="wrap_content"

@@ -17,6 +17,7 @@ public class UserProfile {
     public final boolean approved;   // false while a staff account waits for an administrator
     public final boolean suspended;  // set by an administrator; the person cannot use the app
     public final long createdAt;     // milliseconds since 1970
+    public String recoveryKey;       // recovery/{key} document; null until a recovery PIN is set
 
     public UserProfile(String uid, String fullName, String email, String role, String idNumber,
                        boolean approved, boolean suspended, long createdAt) {
@@ -38,9 +39,11 @@ public class UserProfile {
 
     public static UserProfile from(DocumentSnapshot d) {
         Long created = d.getLong("createdAt");
-        return new UserProfile(d.getId(), d.getString("fullName"), d.getString("email"), d.getString("role"),
+        UserProfile p = new UserProfile(d.getId(), d.getString("fullName"), d.getString("email"), d.getString("role"),
                 d.getString("idNumber"), Boolean.TRUE.equals(d.getBoolean("approved")),
                 Boolean.TRUE.equals(d.getBoolean("suspended")), created == null ? 0 : created);
+        p.recoveryKey = d.getString("recoveryKey");
+        return p;
     }
 
     public Map<String, Object> toMap() {
@@ -56,7 +59,13 @@ public class UserProfile {
     }
 
     public UserProfile withRole(String newRole, boolean nowApproved) {
-        return new UserProfile(uid, fullName, email, newRole, idNumber, nowApproved, suspended, createdAt);
+        UserProfile p = new UserProfile(uid, fullName, email, newRole, idNumber, nowApproved, suspended, createdAt);
+        p.recoveryKey = recoveryKey;
+        return p;
+    }
+
+    public boolean hasRecoveryPin() {
+        return recoveryKey != null && !recoveryKey.isEmpty();
     }
 
     /** True for a staff account an administrator has not approved yet. */

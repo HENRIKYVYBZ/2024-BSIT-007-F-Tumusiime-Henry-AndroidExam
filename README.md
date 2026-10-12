@@ -13,8 +13,9 @@ Library Management System.
 | Screen | What it does |
 |---|---|
 | Sign in | Email and password (Firebase Authentication), Show/Hide password, links to Forgot password and Create account; skipped when already signed in |
-| Create account | I am a student / teaching staff / non-teaching staff, full name, registration number or staff ID, email, password and confirmation, all validated; sends a verification email |
+| Create account | I am a student / teaching staff / non-teaching staff, full name, registration number or staff ID, email, password and confirmation, recovery PIN, all validated; sends a verification email |
 | Reset password | Sends a password-reset link to the student's email |
+| Forgot your email? | Two-step account recovery without SMS: (1) registration number or staff ID, (2) the 6-digit recovery PIN chosen at sign-up. If both match, the account's email is shown and a reset link can be sent to it. Five wrong PINs lock the screen for 15 minutes. The PIN is never stored: the email is saved under the SHA-256 of ID + PIN (`recovery/{key}`) |
 | Catalogue | Greets the signed-in person with a colour-coded role badge; lists every book from the phone's SQLite copy of the shared catalogue (kept live from Cloud Firestore); live search by title, author or subject; shows how many copies are available |
 | Book details | Shelf location, subject, year, description and availability; Reserve button (disabled when no copies are left) |
 | Reserve | Form with full name, registration number or staff ID and pickup date (calendar); validates every field; saves the reservation to Cloud Firestore in one transaction, so the last copy can never go to two people |

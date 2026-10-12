@@ -51,6 +51,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // recovery/{key}: two-step account recovery. key = SHA-256(ID number + recovery PIN), so only
+    // someone who knows both can find the document. It holds just the account's email.
+    match /recovery/{key} {
+      allow get: if true;      // works signed out: that's when people need it
+      allow list: if false;    // nobody can browse the collection
+      // You can only store your own email, under your own account.
+      allow create, update: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
     // books/{bookId}: the shared catalogue
     match /books/{bookId} {
       allow read: if signedIn();

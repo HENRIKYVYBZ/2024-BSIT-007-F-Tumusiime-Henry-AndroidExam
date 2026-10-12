@@ -33,6 +33,7 @@ public final class Session {
                 .putBoolean("approved", p.approved)
                 .putBoolean("suspended", p.suspended)
                 .putLong("created_at", p.createdAt)
+                .putString("recovery_key", p.recoveryKey)
                 .apply();
         ProfileStore.save(c, p.uid, p.fullName, p.idNumber);
     }
@@ -45,6 +46,7 @@ public final class Session {
         current = new UserProfile(uid, sp.getString("name", ""), sp.getString("email", ""),
                 sp.getString("role", null), sp.getString("id_number", ""), sp.getBoolean("approved", false),
                 sp.getBoolean("suspended", false), sp.getLong("created_at", 0));
+        current.recoveryKey = sp.getString("recovery_key", null);
         return current;
     }
 

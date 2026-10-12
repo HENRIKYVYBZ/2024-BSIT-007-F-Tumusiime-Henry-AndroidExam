@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Forgot your email? Two-step recovery: ID number, then recovery PIN -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            style="@style/LibBackButton" />
+
+        <TextView
+            style="@style/LibHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text="@string/recover_title" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/lib_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Progress: two dots -->
+            <LinearLayout
+                android:id="@+id/steps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/step_one"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_step_active"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/step_line"
+                    android:layout_width="0dp"
+                    android:layout_height="3dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="1"
+                    android:background="@color/lib_border" />
+
+                <TextView
+                    android:id="@+id/step_two"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_step_inactive"
+                    android:gravity="center"
+                    android:text="2"
+                    android:textColor="@color/lib_muted"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/step_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/lib_text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/step_intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="2dp"
+                android:textColor="@color/lib_muted"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/error_text"
+                style="@style/LibErrorBox" />
+
+            <!-- Step 1 -->
+            <LinearLayout
+                android:id="@+id/panel_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/LibLabel"
+                    android:text="@string/label_reader_id" />
+
+                <EditText
+                    android:id="@+id/input_id"
+                    style="@style/LibInput"
+                    android:hint="@string/hint_reader_id"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapCharacters|textNoSuggestions"
+                    android:maxLength="20" />
+            </LinearLayout>
+
+            <!-- Step 2 -->
+            <LinearLayout
+                android:id="@+id/panel_pin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/LibLabel"
+                    android:text="@string/label_recovery_pin" />
+
+                <EditText
+                    android:id="@+id/input_pin"
+                    style="@style/LibInput"
+                    android:gravity="center"
+                    android:hint="@string/hint_pin"
+                    android:imeOptions="actionDone"
+                    android:inputType="numberPassword"
+                    android:letterSpacing="0.5"
+                    android:maxLength="6"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+            <!-- Found -->
+            <LinearLayout
+                android:id="@+id/panel_found"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_success_box"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/your_account_email"
+                    android:textColor="@color/lib_green"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/found_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/lib_text"
+                    android:textIsSelectable="true"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_send_reset"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/bg_button_approve"
+                    android:stateListAnimator="@null"
+                    android:text="@string/send_reset_to_email"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_next"
+                style="@style/LibPrimaryButton"
+                android:layout_marginTop="26dp"
+                android:text="@string/next" />
+
+            <TextView
+                android:id="@+id/no_pin_help"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/no_pin_help"
+                android:textColor="@color/lib_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Set or change the account recovery PIN -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LibScreen">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            style="@style/LibBackButton" />
+
+        <TextView
+            android:id="@+id/pin_title"
+            style="@style/LibHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:text="@string/set_recovery_pin" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/lib_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/recovery_pin_intro"
+                android:textColor="@color/lib_muted"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/error_text"
+                style="@style/LibErrorBox" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_reader_id" />
+
+            <EditText
+                android:id="@+id/input_id"
+                style="@style/LibInput"
+                android:hint="@string/hint_reader_id"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:maxLength="20" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_new_pin" />
+
+            <EditText
+                android:id="@+id/input_pin"
+                style="@style/LibInput"
+                android:hint="@string/hint_pin"
+                android:imeOptions="actionNext"
+                android:inputType="numberPassword"
+                android:maxLength="6" />
+
+            <TextView
+                style="@style/LibLabel"
+                android:text="@string/label_confirm_pin" />
+
+            <EditText
+                android:id="@+id/input_confirm_pin"
+                style="@style/LibInput"
+                android:hint="@string/hint_pin_again"
+                android:imeOptions="actionDone"
+                android:inputType="numberPassword"
+                android:maxLength="6" />
+
+            <Button
+                android:id="@+id/btn_save_pin"
+                style="@style/LibPrimaryButton"
+                android:layout_marginTop="26dp"
+                android:text="@string/save_pin" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
