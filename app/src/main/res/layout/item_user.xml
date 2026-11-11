@@ -76,10 +76,21 @@
                 android:layout_marginTop="2dp"
                 android:textColor="@color/lib_disabled"
                 android:textSize="12sp" />
+
+            <!-- Waiting accounts: what the official ID list says about this ID -->
+            <TextView
+                android:id="@+id/user_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/lib_notice"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Only for staff waiting for approval -->
+    <!-- Only for accounts waiting for approval -->
     <LinearLayout
         android:id="@+id/user_actions"
         android:layout_width="match_parent"

@@ -148,12 +148,12 @@
     <string name="role_student">Student</string>
     <string name="role_teaching">Teaching staff (lecturer)</string>
     <string name="role_non_teaching">Non-teaching staff</string>
-    <string name="staff_approval_note">Staff accounts are checked by the library administrator. Until then you can use the library with student limits.</string>
+    <string name="staff_approval_note">Your registration number or staff ID is checked against the university\'s official list. If it is there, your account is ready at once; if not, the library administrator confirms it.</string>
     <string name="label_staff_id">Staff ID</string>
     <string name="hint_staff_id">e.g. ST-0123</string>
     <string name="hint_pickup_days">Tap to choose (within %1$d days)</string>
     <string name="role_waiting_badge">%1$s · pending</string>
-    <string name="waiting_banner">Your %1$s account is waiting for the library administrator\'s approval. Until then you have student limits.</string>
+    <string name="waiting_banner">Your ID was not found on the university\'s official list yet, so the library administrator will confirm your %1$s account. You can browse the catalogue meanwhile. Tap here to check again.</string>
     <string name="profile_not_loaded">Your profile could not be loaded, so role tools are hidden. %1$s</string>
     <string name="suspended_title">Account suspended</string>
     <string name="suspended_message">The library administrator has suspended this account. Please visit the library desk.</string>
@@ -165,7 +165,7 @@
     <string name="search_users_hint">Search name, email or ID</string>
     <string name="tab_waiting">Waiting (%1$d)</string>
     <string name="tab_all_users">All users (%1$d)</string>
-    <string name="no_waiting_accounts">No staff accounts are waiting for approval.</string>
+    <string name="no_waiting_accounts">No accounts are waiting. IDs on the official list are approved automatically.</string>
     <string name="no_matching_users">No accounts match your search.</string>
     <string name="no_name">(no name)</string>
     <string name="no_id">no ID</string>
@@ -175,12 +175,12 @@
     <string name="admins_only">Only administrators can manage users.</string>
     <string name="cannot_change_self">You can\'t change your own account here. Ask another administrator.</string>
     <string name="action_approve">Approve as %1$s</string>
-    <string name="action_reject">Reject staff request (keep as student)</string>
+    <string name="action_reject">Reject (suspend this account)</string>
     <string name="action_change_role">Change role…</string>
     <string name="action_suspend">Suspend account</string>
     <string name="action_restore">Restore account</string>
-    <string name="reject_title">Reject staff request?</string>
-    <string name="reject_message">%1$s will keep a student account with student limits.</string>
+    <string name="reject_title">Reject this account?</string>
+    <string name="reject_message">%1$s\'s ID is not a USJM one. The account will be suspended (you can restore it later from All users).</string>
     <string name="suspend_title">Suspend account?</string>
     <string name="suspend_message">%1$s will be signed out and won\'t be able to use the app until you restore the account.</string>
     <string name="choose_role_for">Role for %1$s</string>
@@ -348,4 +348,34 @@
     <string name="error_loading">Could not load library data. Please try again.</string>
     <string name="error_saving">Could not save. Please try again.</string>
     <string name="error_book_not_found">That book could not be found.</string>
+
+    <!-- Official ID list: automatic approval -->
+    <string name="id_found_on_list">Your ID was found on the university\'s list, so your account is ready.</string>
+    <string name="id_not_on_list">Your ID was not found on the university\'s list yet; the library administrator will confirm your account.</string>
+    <string name="checking_id">Checking your ID on the university\'s list…</string>
+    <string name="id_confirmed">✓ Your ID is on the university\'s list. Your account is confirmed.</string>
+    <string name="id_still_not_found_title">Not on the list yet</string>
+    <string name="id_still_not_found">%1$s is still not on the university\'s official list (or it is already used by another account). The library administrator will confirm your account. Check that the ID on your profile is exactly as on your ID card.</string>
+    <string name="not_confirmed_title">Account not confirmed yet</string>
+    <string name="not_confirmed_message">You can reserve books once your ID is confirmed. Your ID was not found on the university\'s official list, so the library administrator will check it. Meanwhile you can browse and search the catalogue.</string>
+    <string name="id_list">ID list</string>
+    <string name="id_list_title">Official ID list</string>
+    <string name="id_list_loading">Counting the IDs on the list…</string>
+    <string name="id_list_counts">%1$s student and staff IDs are on the list; %2$s have been used to create an account.\nNew accounts with an ID on the list (and the same role) are approved automatically.</string>
+    <string name="id_list_format">Import a CSV file from the records office, one person per line:\nid, role, name\ne.g. 2024/BSIT/007/F, student, Tumusiime Henry\nRole: student, teaching staff or non-teaching staff. Importing again only adds or updates IDs.</string>
+    <string name="import_csv">Import CSV…</string>
+    <string name="close">Close</string>
+    <string name="csv_unreadable">That file could not be read. Choose a CSV file (in Excel: File > Save As > CSV).</string>
+    <string name="csv_nothing_found">No valid IDs were found in that file.</string>
+    <string name="csv_summary">Found %1$s IDs: %2$s students, %3$s teaching staff and %4$s non-teaching staff. Add them to the official list?</string>
+    <string name="csv_skipped">%1$d lines were skipped:</string>
+    <string name="import_title">Import ID list</string>
+    <string name="import_progress">Saved %1$s of %2$s IDs…</string>
+    <string name="import_done">✓ %1$s IDs are on the official list</string>
+    <string name="import_failed">The import stopped after %1$s IDs. Import the same file again to finish (IDs already saved are only updated).</string>
+    <string name="note_not_on_list">Not on the official ID list</string>
+    <string name="note_id_used">This ID is already used by another account</string>
+    <string name="note_other_role">On the ID list as %1$s, but signed up with another role</string>
+    <string name="note_on_list">On the ID list. They can tap the banner in the app to confirm, or approve here</string>
+    <string name="note_no_id">No ID number given</string>
 </resources>

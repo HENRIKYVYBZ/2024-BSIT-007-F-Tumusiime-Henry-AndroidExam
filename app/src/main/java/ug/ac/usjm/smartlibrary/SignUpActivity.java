@@ -20,6 +20,7 @@ import ug.ac.usjm.smartlibrary.auth.PasswordToggle;
 import ug.ac.usjm.smartlibrary.auth.Session;
 import ug.ac.usjm.smartlibrary.data.AccountRecovery;
 import ug.ac.usjm.smartlibrary.data.CloudLibrary;
+import ug.ac.usjm.smartlibrary.data.Roster;
 import ug.ac.usjm.smartlibrary.data.UserDirectory;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
 import ug.ac.usjm.smartlibrary.util.RecoveryKey;
@@ -30,7 +31,9 @@ import ug.ac.usjm.smartlibrary.util.Validator;
  * Create an account: who you are (student, teaching staff or non-teaching staff), full name,
  * registration number or staff ID, email and password. The account is created in Firebase
  * Authentication and the profile is saved in Cloud Firestore (users/{uid}).
- * Staff accounts wait for an administrator's approval; librarians and administrators are never self-chosen.
+ * If the registration number / staff ID is on the university's official ID list (with the same role), the
+ * account is approved at once (see Roster); otherwise it waits for the administrator.
+ * Librarians and administrators are never self-chosen.
  */
 public class SignUpActivity extends AppCompatActivity {
 
@@ -74,13 +77,13 @@ public class SignUpActivity extends AppCompatActivity {
         return Roles.STUDENT;
     }
 
-    /** Students give a registration number; staff give a staff ID and see the approval note. */
+    /** Students give a registration number; staff give a staff ID. */
     private void showFieldsForRole() {
         boolean student = Roles.usesRegNumber(selectedRole());
         idLabel.setText(student ? R.string.label_reg : R.string.label_staff_id);
         idInput.setHint(student ? R.string.hint_reg : R.string.hint_staff_id);
         idInput.setError(null);
-        staffNote.setVisibility(student ? View.GONE : View.VISIBLE);
+        staffNote.setVisibility(View.VISIBLE);   // everyone's ID is checked against the official list
     }
 
     private void createAccount() {
@@ -128,23 +131,25 @@ public class SignUpActivity extends AppCompatActivity {
             user.sendEmailVerification();
 
             // Remember the profile on the phone first, so it is not lost if the cloud save fails.
-            final UserProfile profile = UserProfile.newAccount(user.getUid(), name, email, role, idNumber);
-            Session.set(this, profile);
-            UserDirectory.create(profile, new UserDirectory.Result<UserProfile>() {
+            final UserProfile pending = UserProfile.newAccount(user.getUid(), name, email, role, idNumber);
+            Session.set(this, pending);
+            // Approved at once if the ID is on the university's official list, otherwise waits for the administrator.
+            Roster.saveNewAccount(pending, new UserDirectory.Result<UserProfile>() {
                 @Override
-                public void onSuccess(UserProfile saved) {
+                public void onSuccess(final UserProfile saved) {
+                    Session.set(SignUpActivity.this, saved);
                     // Two-step recovery: ID number + PIN will find this email if it is ever forgotten.
-                    AccountRecovery.save(profile.uid, email, idNumber, pin, null, new CloudLibrary.Result<String>() {
+                    AccountRecovery.save(saved.uid, email, idNumber, pin, null, new CloudLibrary.Result<String>() {
                         @Override
                         public void onSuccess(String key) {
-                            profile.recoveryKey = key;
-                            Session.set(SignUpActivity.this, profile);
-                            finishSignUp(email, null);
+                            saved.recoveryKey = key;
+                            Session.set(SignUpActivity.this, saved);
+                            finishSignUp(email, saved.approved, null);
                         }
 
                         @Override
                         public void onError(String message) {
-                            finishSignUp(email, message);   // the catalogue offers to set the PIN again
+                            finishSignUp(email, saved.approved, message);   // the catalogue offers to set the PIN again
                         }
                     });
                 }
@@ -152,14 +157,15 @@ public class SignUpActivity extends AppCompatActivity {
                 @Override
                 public void onError(String message) {
                     // The account exists; the catalogue retries saving the profile on its next launch.
-                    finishSignUp(email, message);
+                    finishSignUp(email, false, message);
                 }
             });
         });
     }
 
-    private void finishSignUp(String email, String cloudError) {
-        String welcome = getString(R.string.account_created, email);
+    private void finishSignUp(String email, boolean approved, String cloudError) {
+        String welcome = getString(R.string.account_created, email) + "\n"
+                + getString(approved ? R.string.id_found_on_list : R.string.id_not_on_list);
         Toast.makeText(this, cloudError == null ? welcome : welcome + "\n" + cloudError, Toast.LENGTH_LONG).show();
         Intent i = new Intent(this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

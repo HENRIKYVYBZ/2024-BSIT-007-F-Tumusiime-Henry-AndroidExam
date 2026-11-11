@@ -24,7 +24,7 @@ service cloud.firestore {
     function isLibrarian() {   // administrators can do everything a librarian can
       return active() && profile().get('role', '') in ['librarian', 'admin'];
     }
-    // The role whose limits apply: staff waiting for approval count as students.
+    // The role whose limits apply: accounts not yet approved count as students.
     function effectiveRole() {
       return profile().get('approved', false) == true ? profile().get('role', 'student') : 'student';
     }
@@ -35,20 +35,55 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == uid || isLibrarian());
 
       // Sign-up: only for yourself, only as student / teaching staff / non-teaching staff.
-      // Students are approved at once; staff must wait for an administrator.
+      // Approved at once ONLY if the ID is on the official list (claimsRosterId), otherwise unapproved.
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.role in ['student', 'teaching_staff', 'non_teaching_staff']
-        && request.resource.data.approved == (request.resource.data.role == 'student')
-        && request.resource.data.suspended == false;
+        && request.resource.data.suspended == false
+        && (request.resource.data.approved == false || claimsRosterId(request.resource.data));
 
-      // Administrators may change anything. Everyone else may edit their own profile
-      // but never their role, approval or suspension.
+      // Administrators may change anything. Everyone else may edit their own profile but never
+      // their role, approval, suspension or list entry, and the ID only while it is still empty.
+      // One exception: a waiting account approves itself by claiming its ID on the list ("check again").
       allow update: if isAdmin()
         || (signedIn() && request.auth.uid == uid
             && !request.resource.data.diff(resource.data).affectedKeys()
-                 .hasAny(['role', 'approved', 'suspended']));
+                 .hasAny(['role', 'approved', 'suspended', 'rosterKey'])
+            && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['idNumber'])
+                || resource.data.get('idNumber', '') == ''))
+        || (signedIn() && request.auth.uid == uid
+            && resource.data.approved == false && resource.data.get('suspended', false) == false
+            && request.resource.data.approved == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approved', 'rosterKey'])
+            && claimsRosterId(request.resource.data));
 
       allow delete: if false;
+    }
+
+    // True when this profile takes an unused entry of the official ID list with the same role,
+    // in the same batch (roster/{key}.claimedBy is set to this account). key = ID with "/" as "-".
+    function claimsRosterId(data) {
+      let key = data.rosterKey;
+      let entry = /databases/$(database)/documents/roster/$(key);
+      return key == data.idNumber.replace('/', '-')
+        && exists(entry)
+        && get(entry).data.role == data.role
+        && get(entry).data.get('claimedBy', null) == null
+        && getAfter(entry).data.claimedBy == request.auth.uid;
+    }
+
+    // roster/{key}: the university's official list of student registration numbers and staff IDs.
+    // Only administrators can read or import it, so nobody can browse other people's IDs.
+    match /roster/{key} {
+      allow read, create, delete: if isAdmin();
+      // Administrators edit freely. Anyone else may only mark an unused entry as theirs, in the
+      // same batch that approves their own profile with this entry (see claimsRosterId).
+      allow update: if isAdmin()
+        || (signedIn()
+            && resource.data.get('claimedBy', null) == null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedBy', 'claimedAt'])
+            && request.resource.data.claimedBy == request.auth.uid
+            && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.rosterKey == key
+            && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.approved == true);
     }
 
     // recovery/{key}: two-step account recovery. key = SHA-256(ID number + recovery PIN), so only
@@ -95,6 +130,7 @@ service cloud.firestore {
       // off the shelf in the same transaction. A new reservation always starts ACTIVE.
       // Librarians also create loans directly for walk-in readers.
       allow create: if isLibrarian() || (active()
+        && profile().get('approved', false) == true      // ID confirmed (official list or administrator)
         && request.resource.data.userUid == request.auth.uid
         && request.resource.data.status == 'ACTIVE'
         && request.resource.data.role == effectiveRole()

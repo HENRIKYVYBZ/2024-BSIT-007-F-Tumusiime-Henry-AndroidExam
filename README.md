@@ -25,21 +25,38 @@ Library Management System.
 | Lend a book (librarians) | Walk-in loans without a reservation: scan the book's QR label (or pick it from the shelf list), type the reader's registration number or staff ID, check the name, tap **Lend** |
 | Add / edit book (librarians) | Add a new title or edit one (all fields validated); change the number of copies (never below the copies that are out); remove a book nobody holds; each book page shows its QR label |
 | Return reminders | 08:00 alarm on the due date, and on opening the app a notification for books due tomorrow, overdue, or asked back by the librarian |
-| Manage users (administrators) | Approve staff accounts, reject a staff request, change anyone's role (e.g. make a librarian), suspend or restore an account; search by name, email or ID |
+| Manage users (administrators) | **ID list**: import the university's official list of registration numbers and staff IDs from a CSV file, see how many are loaded and used. Waiting accounts show why they wait (not on the list, ID already used, other role); approve, reject (suspend), change anyone's role (e.g. make a librarian), suspend or restore; search by name, email or ID |
 
 ## User roles
 
 | Role | How you get it | Reservations at a time | Book ahead |
 |---|---|---|---|
-| Student | Choose it when signing up (approved at once) | 3 | 7 days |
-| Teaching staff | Choose it when signing up, then an administrator approves | 10 | 14 days |
-| Non-teaching staff | Choose it when signing up, then an administrator approves | 5 | 7 days |
+| Student | Choose it when signing up | 3 | 7 days |
+| Teaching staff | Choose it when signing up | 10 | 14 days |
+| Non-teaching staff | Choose it when signing up | 5 | 7 days |
 | Librarian | Given by an administrator | 5 | 14 days |
 | Administrator | Given by another administrator (the first one is set in the Firebase console) | 5 | 14 days |
 
-Loans last 14 days for students and 30 days for staff. Staff waiting for approval can use the app with student limits. Roles are stored in Cloud Firestore
-(`users/{uid}`) and protected by `firestore.rules`: nobody can give themselves a role, approve
-themselves or lift their own suspension, even with a modified app.
+Loans last 14 days for students and 30 days for staff.
+
+### Automatic approval with the official ID list
+
+With 1,000+ students and 100+ staff, approving every account by hand is too much work, so accounts
+are approved automatically against the university's official ID list:
+
+1. The administrator imports the list once per semester in **Manage users → ID list → Import CSV**
+   (one person per line: `id, role, name`; see `docs/sample_id_list.csv`). It is stored as
+   `roster/{ID}` in Cloud Firestore.
+2. At sign-up, if the registration number / staff ID is on the list **with the same role** and no other
+   account has used it, the account is approved at once and the ID is marked as used. One ID = one account.
+3. Otherwise the account waits for the administrator. It can browse and search, but not reserve. The
+   **Waiting** tab says why (not on the list, ID already used, other role). If the list is imported
+   later, the person taps the banner in the app to check again.
+
+`firestore.rules` enforces all of this on the server (`claimsRosterId`), so typing a made-up ID or
+choosing a higher role in a modified app does not work. Only administrators can read the list, so
+nobody can browse other people's IDs or names. Nobody can give themselves a role, approve themselves
+or lift their own suspension.
 
 Library rules enforced by the app:
 - a book can be reserved only while a copy is available;

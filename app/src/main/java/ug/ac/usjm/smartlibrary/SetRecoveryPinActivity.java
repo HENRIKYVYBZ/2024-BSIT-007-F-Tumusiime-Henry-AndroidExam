@@ -76,6 +76,7 @@ public class SetRecoveryPinActivity extends AppCompatActivity {
                 UserProfile updated = new UserProfile(me.uid, me.fullName, me.email, me.role, id, me.approved,
                         me.suspended, me.createdAt);
                 updated.recoveryKey = key;
+                updated.rosterKey = me.rosterKey;
                 Session.set(SetRecoveryPinActivity.this, updated);
                 Toast.makeText(SetRecoveryPinActivity.this, R.string.recovery_pin_saved, Toast.LENGTH_LONG).show();
                 finish();

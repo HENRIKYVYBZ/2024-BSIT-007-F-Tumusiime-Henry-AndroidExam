@@ -5,8 +5,8 @@ package ug.ac.usjm.smartlibrary.util;
  * unit tested. The role is stored in Firestore (users/{uid}.role); the Firestore security rules
  * enforce the same rules on the server, so changing this file alone cannot give anyone more rights.
  *
- * Staff accounts start "waiting for approval": until an administrator approves them they have
- * student limits.
+ * New accounts are approved automatically when their ID is on the university's official ID list
+ * (see RosterCsv / Roster); otherwise they wait for an administrator and cannot reserve until then.
  */
 public final class Roles {
 
@@ -39,17 +39,12 @@ public final class Roles {
         return false;
     }
 
-    /** Students are approved at once; every other role needs an administrator's approval. */
-    public static boolean needsApproval(String role) {
-        return !STUDENT.equals(role);
-    }
-
     /** Students identify with a registration number; everyone else with a staff ID. */
     public static boolean usesRegNumber(String role) {
         return STUDENT.equals(role);
     }
 
-    /** The role whose limits apply: staff waiting for approval are treated as students. */
+    /** The role whose limits apply: accounts not yet approved are treated as students. */
     public static String effective(String role, boolean approved) {
         if (!isKnown(role)) return STUDENT;
         return approved ? role : STUDENT;

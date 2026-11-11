@@ -12,14 +12,17 @@ import androidx.core.content.ContextCompat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import ug.ac.usjm.smartlibrary.data.UserProfile;
 
 /**
  * Shows each account as a card (layout: item_user.xml): initials avatar and badge in the role's colour,
- * status, email and ID. Staff waiting for approval get a gold border and Approve / Reject buttons.
+ * status, email and ID. Accounts waiting for approval get a gold border, a note about the official ID list,
+ * and Approve / Reject buttons.
  */
 public class UserAdapter extends BaseAdapter {
 
@@ -34,12 +37,20 @@ public class UserAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
     private final OnDecisionListener listener;
     private final List<UserProfile> items = new ArrayList<>();
+    private final Map<String, String> notes = new HashMap<>();   // uid -> what the ID list says
     private final SimpleDateFormat joinedFormat = new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH);
 
     public UserAdapter(Context context, OnDecisionListener listener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.listener = listener;
+    }
+
+    /** Short notes for waiting accounts, e.g. "Not on the official ID list". */
+    public void setNotes(Map<String, String> byUid) {
+        notes.clear();
+        notes.putAll(byUid);
+        notifyDataSetChanged();
     }
 
     public void setUsers(List<UserProfile> list) {
@@ -66,7 +77,7 @@ public class UserAdapter extends BaseAdapter {
     /** Remembers the views of one card so they are not looked up again while scrolling. */
     private static class ViewHolder {
         View card, actions, approve, reject;
-        TextView avatar, name, status, role, details, joined;
+        TextView avatar, name, status, role, details, joined, note;
     }
 
     @Override
@@ -82,6 +93,7 @@ public class UserAdapter extends BaseAdapter {
             h.role = (TextView) convertView.findViewById(R.id.user_role);
             h.details = (TextView) convertView.findViewById(R.id.user_details);
             h.joined = (TextView) convertView.findViewById(R.id.user_joined);
+            h.note = (TextView) convertView.findViewById(R.id.user_note);
             h.actions = convertView.findViewById(R.id.user_actions);
             h.approve = convertView.findViewById(R.id.btn_approve);
             h.reject = convertView.findViewById(R.id.btn_reject);
@@ -118,7 +130,11 @@ public class UserAdapter extends BaseAdapter {
         h.status.setBackgroundResource(bg);
         h.status.setTextColor(ContextCompat.getColor(context, color));
 
-        // Waiting staff stand out and can be approved or rejected in one tap.
+        String note = waiting ? notes.get(u.uid) : null;
+        h.note.setText(note);
+        h.note.setVisibility(note == null ? View.GONE : View.VISIBLE);
+
+        // Waiting accounts stand out and can be approved or rejected in one tap.
         h.card.setBackgroundResource(waiting ? R.drawable.bg_card_waiting : R.drawable.bg_card);
         h.actions.setVisibility(waiting ? View.VISIBLE : View.GONE);
         h.approve.setOnClickListener(v -> listener.onApprove(u));

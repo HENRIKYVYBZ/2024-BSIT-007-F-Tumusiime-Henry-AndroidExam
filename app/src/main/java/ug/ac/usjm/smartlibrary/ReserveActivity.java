@@ -81,11 +81,21 @@ public class ReserveActivity extends AppCompatActivity {
         // The signed-in person's role decides the ID field and the limits.
         FirebaseUser signedIn = FirebaseAuth.getInstance().getCurrentUser();
         profile = signedIn == null ? null : Session.get(this, signedIn.getUid());
+        if (profile != null && !profile.approved) {
+            // ID not confirmed yet (not on the official list, no administrator approval): browse only.
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.not_confirmed_title)
+                    .setMessage(R.string.not_confirmed_message)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.ok, (d, w) -> finish())
+                    .show();
+            return;
+        }
         boolean approved = profile == null || profile.approved;
         if (profile != null) role = profile.role;
         maxDaysAhead = Roles.maxPickupDaysAhead(role, approved);
         maxActive = Roles.maxActiveReservations(role, approved);
-        boolean student = Roles.usesRegNumber(role);   // staff waiting for approval still use their staff ID
+        boolean student = Roles.usesRegNumber(role);
         ((TextView) findViewById(R.id.label_id)).setText(student ? R.string.label_reg : R.string.label_staff_id);
         regInput.setHint(student ? R.string.hint_reg : R.string.hint_staff_id);
         pickupInput.setHint(getString(R.string.hint_pickup_days, maxDaysAhead));

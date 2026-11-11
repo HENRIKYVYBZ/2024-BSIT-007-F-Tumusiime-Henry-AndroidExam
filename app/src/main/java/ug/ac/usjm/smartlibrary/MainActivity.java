@@ -35,6 +35,7 @@ import ug.ac.usjm.smartlibrary.auth.Session;
 import ug.ac.usjm.smartlibrary.data.Book;
 import ug.ac.usjm.smartlibrary.data.CloudLibrary;
 import ug.ac.usjm.smartlibrary.data.LibraryRepository;
+import ug.ac.usjm.smartlibrary.data.Roster;
 import ug.ac.usjm.smartlibrary.data.UserDirectory;
 import ug.ac.usjm.smartlibrary.data.UserProfile;
 import ug.ac.usjm.smartlibrary.data.Reservation;
@@ -306,8 +307,10 @@ public class MainActivity extends AppCompatActivity {
         if (p.isWaitingForApproval()) {
             accountBanner.setText(getString(R.string.waiting_banner, Roles.label(p.role).toLowerCase(Locale.ENGLISH)));
             accountBanner.setVisibility(View.VISIBLE);
+            accountBanner.setOnClickListener(v -> checkIdAgain(p));
         } else {
             accountBanner.setVisibility(View.GONE);
+            accountBanner.setOnClickListener(null);
         }
 
         boolean admin = Roles.canManageUsers(p.role, p.approved);
@@ -315,6 +318,36 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_manage_users).setVisibility(admin ? View.VISIBLE : View.GONE);
         findViewById(R.id.btn_desk).setVisibility(desk ? View.VISIBLE : View.GONE);
         findViewById(R.id.role_tools).setVisibility(admin || desk ? View.VISIBLE : View.GONE);
+    }
+
+    /** Tapping the "waiting" banner: look for the ID on the official list again (it may have been imported since). */
+    private void checkIdAgain(final UserProfile p) {
+        accountBanner.setText(R.string.checking_id);
+        Roster.checkAgain(p, new UserDirectory.Result<UserProfile>() {
+            @Override
+            public void onSuccess(UserProfile approved) {
+                if (isFinishing() || isDestroyed()) return;
+                if (approved == null) {
+                    showProfile(p);
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.id_still_not_found_title)
+                            .setMessage(getString(R.string.id_still_not_found, p.idNumber))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                    return;
+                }
+                Session.set(MainActivity.this, approved);
+                showProfile(approved);
+                Toast.makeText(MainActivity.this, R.string.id_confirmed, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                if (isFinishing() || isDestroyed()) return;
+                showProfile(p);
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /** A librarian's work starts at the desk, so open it straight after sign-in (once per launch). */

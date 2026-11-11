@@ -34,6 +34,7 @@ public final class Session {
                 .putBoolean("suspended", p.suspended)
                 .putLong("created_at", p.createdAt)
                 .putString("recovery_key", p.recoveryKey)
+                .putString("roster_key", p.rosterKey)
                 .apply();
         ProfileStore.save(c, p.uid, p.fullName, p.idNumber);
     }
@@ -47,6 +48,7 @@ public final class Session {
                 sp.getString("role", null), sp.getString("id_number", ""), sp.getBoolean("approved", false),
                 sp.getBoolean("suspended", false), sp.getLong("created_at", 0));
         current.recoveryKey = sp.getString("recovery_key", null);
+        current.rosterKey = sp.getString("roster_key", null);
         return current;
     }
 
