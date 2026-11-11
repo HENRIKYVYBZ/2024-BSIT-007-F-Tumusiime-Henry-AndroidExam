@@ -43,6 +43,28 @@
             android:exported="false"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
+        <!-- Opens from the link in a password-reset or verify-email message (Android App Link).
+             The hosts must match the Firebase project; hosting/public/.well-known/assetlinks.json proves
+             this app owns them, so Android opens the link here instead of asking which app to use. -->
+        <activity
+            android:name=".ResetPasswordActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="usjm-smart-library.web.app" />
+                <data android:host="usjm-smart-library.firebaseapp.com" />
+                <!-- Firebase's default link (works without any console setting) -->
+                <data android:path="/__/auth/action" />
+                <!-- Our own page, if "Customize action URL" is set to https://usjm-smart-library.web.app/auth/action -->
+                <data android:path="/auth/action" />
+            </intent-filter>
+        </activity>
+
         <!-- Forgot your email? (two-step recovery) and setting the recovery PIN -->
         <activity
             android:name=".RecoverAccountActivity"

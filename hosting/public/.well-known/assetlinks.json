@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ug.ac.usjm.smartlibrary",
+      "sha256_cert_fingerprints": ["0D:76:01:CE:2E:4A:67:BD:12:17:F7:53:D0:6C:1A:67:98:61:2D:AF:AC:0E:8D:A0:C6:5E:86:24:AC:9C:23:12"]
+    }
+  }
+]

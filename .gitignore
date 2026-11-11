@@ -20,3 +20,7 @@ app/google-services.json
 # Not part of the app: copies and downloads
 /milestone1/
 /Claude outputs/
+
+# Firebase Hosting CLI cache and logs
+hosting/.firebase/
+firebase-debug.log

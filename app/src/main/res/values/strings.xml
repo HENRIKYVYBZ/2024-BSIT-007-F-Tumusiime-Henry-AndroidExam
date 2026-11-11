@@ -88,6 +88,34 @@
     <string name="reset_sent">If an account exists for %1$s, a reset link is on its way. Check your inbox and spam folder, then sign in with your new password.</string>
     <string name="back_to_sign_in">Back to sign in</string>
 
+    <!-- Link from a password-reset (or verify-email) message: choose and confirm a new password -->
+    <string name="new_password_title">New password</string>
+    <string name="email_link_title">Email link</string>
+    <string name="checking_link">Checking your link…</string>
+    <string name="new_password_heading">Choose a new password</string>
+    <string name="new_password_for">You are changing the password for</string>
+    <string name="label_new_password">New password</string>
+    <string name="label_confirm_new_password">Confirm new password</string>
+    <string name="save_new_password">Save new password</string>
+    <string name="saving">Saving…</string>
+    <string name="rule_length">At least 8 characters</string>
+    <string name="rule_letter">Contains a letter</string>
+    <string name="rule_number">Contains a number</string>
+    <string name="rule_match">Both passwords match</string>
+    <string name="password_changed_title">Password changed</string>
+    <string name="password_changed_message">You can now sign in to USJM Smart Library with your new password.</string>
+    <string name="sign_in_now">Sign in now</string>
+    <string name="link_problem_title">This link can\'t be used</string>
+    <string name="link_expired">The link has expired or was already used. Reset links work once and only for a short time. Ask for a new one below.</string>
+    <string name="link_broken">This link is incomplete. Open it again from the email, or ask for a new one below.</string>
+    <string name="send_new_link">Send a new link</string>
+    <string name="email_verified_title">Email verified</string>
+    <string name="email_verified_message">Thank you. %1$s is now confirmed for your library account.</string>
+    <string name="email_restored_title">Email restored</string>
+    <string name="email_restored_message">Your account email was changed back to %1$s. If you did not ask for the change, reset your password now.</string>
+    <string name="reset_password_now">Reset my password</string>
+    <string name="continue_to_app">Continue</string>
+
     <!-- Signed-in header -->
     <string name="greeting">Hi, %1$s</string>
     <string name="sign_out">Sign out</string>

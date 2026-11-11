@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>USJM Smart Library · Account</title>
+<!--
+  Handles the links in Firebase Authentication emails for USJM Smart Library:
+    resetPassword  -> type the new password twice (must match, same rules as the app) and save it
+    verifyEmail    -> confirm the email address
+    recoverEmail   -> undo an email change
+  Firebase puts mode, oobCode and apiKey in the link. On a phone with the app installed, Android
+  opens the app's ResetPasswordActivity instead (see .well-known/assetlinks.json).
+-->
+<style>
+  :root {
+    --navy: #0B2545; --navy-dark: #071A33; --gold: #E0A526; --bg: #F3F5F9; --card: #FFFFFF;
+    --border: #E1E6EF; --text: #1B2433; --muted: #5D6778; --green: #167A4B; --green-bg: #E3F4EA;
+    --red: #B3261E; --red-bg: #FBE5E3; --grey: #ECEEF2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+         font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: var(--navy); color: #fff; padding: 22px 16px 54px; text-align: center; }
+  .logo { width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%; background: var(--gold);
+          display: grid; place-items: center; color: var(--navy); font-weight: 800; font-size: 20px; }
+  header h1 { margin: 0; font-size: 19px; letter-spacing: .2px; }
+  header p { margin: 4px 0 0; color: #B8C4D6; font-size: 14px; }
+  main { max-width: 440px; margin: -38px auto 32px; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+          padding: 24px 20px; box-shadow: 0 6px 22px rgba(11, 37, 69, .08); }
+  h2 { margin: 0 0 6px; font-size: 21px; }
+  .muted { color: var(--muted); font-size: 14px; margin: 0; }
+  .chip { display: inline-block; margin-top: 8px; padding: 6px 14px; border-radius: 18px;
+          background: var(--grey); color: var(--navy); font-weight: 700; font-size: 14px; word-break: break-all; }
+  label { display: block; margin: 18px 0 6px; color: var(--muted); font-size: 13px; font-weight: 700; }
+  .field { position: relative; }
+  input { width: 100%; min-height: 50px; padding: 0 76px 0 14px; border: 1.5px solid var(--border);
+          border-radius: 10px; font: inherit; color: var(--text); background: #fff; }
+  input:focus { outline: none; border-color: var(--navy); }
+  input.plain { padding-right: 14px; }
+  .toggle { position: absolute; right: 4px; top: 4px; bottom: 4px; padding: 0 14px; border: 0;
+            background: none; color: var(--navy); font: 700 14px system-ui, sans-serif; cursor: pointer; border-radius: 8px; }
+  .meter { display: flex; align-items: center; gap: 5px; margin-top: 10px; }
+  .meter span { flex: 1; height: 6px; border-radius: 3px; background: var(--grey); transition: background .15s; }
+  .meter b { width: 58px; text-align: right; font-size: 13px; color: var(--muted); }
+  ul.rules { list-style: none; margin: 16px 0 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
+  ul.rules li { color: var(--muted); font-size: 14px; padding: 3px 0; }
+  ul.rules li::before { content: "○"; display: inline-block; width: 24px; }
+  ul.rules li.ok { color: var(--green); }
+  ul.rules li.ok::before { content: "✓"; font-weight: 700; }
+  button.primary { width: 100%; min-height: 52px; margin-top: 22px; border: 0; border-radius: 10px;
+                   background: var(--navy); color: #fff; font: 700 16px system-ui, sans-serif; cursor: pointer; }
+  button.primary:disabled { opacity: .55; cursor: default; }
+  .error { display: none; margin-top: 16px; padding: 12px; border-radius: 10px; background: var(--red-bg); color: var(--red); font-size: 14px; }
+  .note { display: none; margin-top: 16px; padding: 12px; border-radius: 10px; background: var(--green-bg); color: var(--green); font-size: 14px; }
+  .result { text-align: center; padding-top: 6px; }
+  .icon { width: 70px; height: 70px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center;
+          color: #fff; font-size: 34px; font-weight: 800; background: var(--green); }
+  .icon.bad { background: var(--red); }
+  .spinner { width: 40px; height: 40px; margin: 10px auto 14px; border: 4px solid var(--grey);
+             border-top-color: var(--navy); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  [hidden] { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding-bottom: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">US</div>
+  <h1>USJM Smart Library</h1>
+  <p>University of Saint Joseph Mbarara</p>
+</header>
+
+<main>
+  <div class="card">
+    <!-- Checking the link -->
+    <section id="loading" class="result">
+      <div class="spinner"></div>
+      <p class="muted">Checking your link…</p>
+    </section>
+
+    <!-- New password + confirm -->
+    <section id="form" hidden>
+      <h2>Choose a new password</h2>
+      <p class="muted">You are changing the password for</p>
+      <span id="email" class="chip"></span>
+      <div id="formError" class="error" role="alert"></div>
+
+      <form id="resetForm" novalidate autocomplete="on">
+        <input type="text" id="username" name="username" autocomplete="username" hidden>
+        <label for="password">New password</label>
+        <div class="field">
+          <input id="password" type="password" autocomplete="new-password" placeholder="At least 8 characters, letters and numbers" required>
+          <button type="button" class="toggle" data-for="password">Show</button>
+        </div>
+        <div class="meter" aria-hidden="true"><span></span><span></span><span></span><span></span><b id="meterLabel"></b></div>
+
+        <label for="confirm">Confirm new password</label>
+        <div class="field">
+          <input id="confirm" type="password" autocomplete="new-password" placeholder="Type the password again" required>
+          <button type="button" class="toggle" data-for="confirm">Show</button>
+        </div>
+
+        <ul class="rules" aria-live="polite">
+          <li id="ruleLength">At least 8 characters</li>
+          <li id="ruleLetter">Contains a letter</li>
+          <li id="ruleNumber">Contains a number</li>
+          <li id="ruleMatch">Both passwords match</li>
+        </ul>
+        <button id="save" class="primary" type="submit" disabled>Save new password</button>
+      </form>
+    </section>
+
+    <!-- Finished, or the link cannot be used -->
+    <section id="result" class="result" hidden>
+      <div id="icon" class="icon">✓</div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultMessage" class="muted"></p>
+
+      <!-- Only for a broken / expired reset link: ask for a new one -->
+      <form id="resendForm" hidden novalidate style="text-align:left">
+        <label for="resendEmail">Your email</label>
+        <input id="resendEmail" class="plain" type="email" autocomplete="email" placeholder="name@gmail.com">
+        <div id="resendError" class="error" role="alert"></div>
+        <div id="resendNote" class="note" role="status"></div>
+        <button id="resend" class="primary" type="submit">Send a new link</button>
+      </form>
+    </section>
+  </div>
+</main>
+<footer>This page only handles USJM Smart Library account emails.</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, verifyPasswordResetCode, confirmPasswordReset, applyActionCode, checkActionCode,
+           sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+  const params = new URLSearchParams(location.search);
+  const mode = params.get("mode");
+  const code = params.get("oobCode");
+  const apiKey = params.get("apiKey");
+  // Remove the one-time code from the address bar and history once it has been read.
+  history.replaceState(null, "", location.pathname);
+
+  const $ = (id) => document.getElementById(id);
+  const show = (id) => ["loading", "form", "result"].forEach((s) => ($(s).hidden = s !== id));
+
+  // Same rules as Validator.newPasswordError / PasswordRules in the Android app.
+  const rules = {
+    length: (p) => p.length >= 8,
+    letter: (p) => /[A-Za-z]/.test(p),
+    number: (p) => /\d/.test(p),
+  };
+  function strength(p) {
+    if (!p) return 0;
+    if (!rules.length(p) || !rules.letter(p) || !rules.number(p)) return 1;
+    const mixed = /[a-z]/.test(p) && /[A-Z]/.test(p), symbol = /[^A-Za-z0-9]/.test(p);
+    let s = 2;
+    if (p.length >= 12 || mixed || symbol) s = 3;
+    if ((p.length >= 12 && (mixed || symbol)) || (mixed && symbol)) s = 4;
+    return s;
+  }
+
+  const messages = {
+    "auth/expired-action-code": "The link has expired. Reset links work once and only for a short time. Ask for a new one below.",
+    "auth/invalid-action-code": "The link was already used or is incomplete. Ask for a new one below.",
+    "auth/user-disabled": "This account has been suspended. Please visit the library desk.",
+    "auth/user-not-found": "No account was found for this link.",
+    "auth/weak-password": "That password is too weak. Use at least 8 characters with letters and numbers.",
+    "auth/network-request-failed": "No internet connection. Check your data or Wi-Fi and try again.",
+    "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
+    "auth/invalid-email": "Enter a valid email, e.g. name@gmail.com",
+  };
+  const explain = (e) => messages[e && e.code] || "Something went wrong. Please try again.";
+  const linkDead = (e) => e && (e.code === "auth/expired-action-code" || e.code === "auth/invalid-action-code");
+
+  function result(ok, title, message, offerResend) {
+    $("icon").textContent = ok ? "✓" : "!";
+    $("icon").className = ok ? "icon" : "icon bad";
+    $("resultTitle").textContent = title;
+    $("resultMessage").textContent = message;
+    $("resendForm").hidden = !offerResend;
+    show("result");
+  }
+
+  const complete = Boolean(mode && code && apiKey);
+  if (!complete) {
+    result(false, "This link can't be used", "This link is incomplete. Open it again from the email you received.", false);
+  }
+  const auth = complete ? getAuth(initializeApp({ apiKey, authDomain: location.hostname })) : null;
+
+  // ---------------------------------------------------------------- reset password
+  let accountEmail = "";
+  if (auth && mode === "resetPassword") {
+    try {
+      accountEmail = await verifyPasswordResetCode(auth, code);
+      $("email").textContent = accountEmail;
+      $("username").value = accountEmail;   // lets the browser's password manager save it under the right account
+      show("form");
+      $("password").focus();
+    } catch (e) {
+      result(false, "This link can't be used", explain(e), true);
+    }
+  }
+
+  function refresh() {
+    const p = $("password").value, c = $("confirm").value;
+    $("ruleLength").classList.toggle("ok", rules.length(p));
+    $("ruleLetter").classList.toggle("ok", rules.letter(p));
+    $("ruleNumber").classList.toggle("ok", rules.number(p));
+    $("ruleMatch").classList.toggle("ok", p.length > 0 && p === c);
+    const s = strength(p), color = s <= 1 ? "var(--red)" : s === 2 ? "var(--gold)" : "var(--green)";
+    document.querySelectorAll(".meter span").forEach((bar, i) => (bar.style.background = i < s ? color : ""));
+    $("meterLabel").textContent = ["", "Weak", "Fair", "Good", "Strong"][s];
+    $("meterLabel").style.color = s ? color : "";
+    // The button only works when every rule is met, including the confirmation.
+    $("save").disabled = !(rules.length(p) && rules.letter(p) && rules.number(p) && p === c);
+  }
+  $("password").addEventListener("input", refresh);
+  $("confirm").addEventListener("input", refresh);
+  document.querySelectorAll(".toggle").forEach((btn) => btn.addEventListener("click", () => {
+    const input = $(btn.dataset.for), hidden = input.type === "password";
+    input.type = hidden ? "text" : "password";
+    btn.textContent = hidden ? "Hide" : "Show";
+  }));
+  refresh();
+
+  $("resetForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const p = $("password").value;
+    if ($("save").disabled) return;
+    $("save").disabled = true;
+    $("save").textContent = "Saving…";
+    $("formError").style.display = "none";
+    try {
+      await confirmPasswordReset(auth, code, p);
+      result(true, "Password changed", "You can now sign in to the USJM Smart Library app with your new password.", false);
+    } catch (e) {
+      if (linkDead(e)) {
+        result(false, "This link can't be used", explain(e), true);
+      } else {
+        $("formError").textContent = explain(e);
+        $("formError").style.display = "block";
+        $("save").textContent = "Save new password";
+        refresh();
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------- other email links
+  if (auth && (mode === "verifyEmail" || mode === "verifyAndChangeEmail")) {
+    try {
+      await applyActionCode(auth, code);
+      result(true, "Email verified", "Thank you. Your email is now confirmed for your library account. You can go back to the app.", false);
+    } catch (e) {
+      result(false, "This link can't be used", linkDead(e)
+        ? "The link has expired or was already used. Sign in to the app to get a new verification email." : explain(e), false);
+    }
+  } else if (auth && mode === "recoverEmail") {
+    try {
+      const info = await checkActionCode(auth, code);
+      await applyActionCode(auth, code);
+      accountEmail = info.data.email || "";
+      result(true, "Email restored", `Your account email was changed back to ${accountEmail}. If you did not ask for the change, reset your password now.`, true);
+      $("resend").textContent = "Send me a password reset link";
+    } catch (e) {
+      result(false, "This link can't be used", explain(e), false);
+    }
+  } else if (auth && mode !== "resetPassword") {
+    result(false, "This link can't be used", "This link is not one this page understands.", false);
+  }
+
+  // ---------------------------------------------------------------- ask for a new reset link
+  $("resendEmail").value = accountEmail;
+  $("resendForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const email = $("resendEmail").value.trim();
+    $("resendError").style.display = $("resendNote").style.display = "none";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      $("resendError").textContent = messages["auth/invalid-email"];
+      $("resendError").style.display = "block";
+      return;
+    }
+    $("resend").disabled = true;
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (e) {
+      // Same answer whether or not the account exists, so this page can't be used to test emails.
+      if (e.code !== "auth/user-not-found" && e.code !== "auth/invalid-email") {
+        $("resendError").textContent = explain(e);
+        $("resendError").style.display = "block";
+        $("resend").disabled = false;
+        return;
+      }
+    }
+    $("resendNote").textContent = `If an account exists for ${email}, a new link is on its way. Check your inbox and spam folder.`;
+    $("resendNote").style.display = "block";
+  });
+</script>
+</body>
+</html>

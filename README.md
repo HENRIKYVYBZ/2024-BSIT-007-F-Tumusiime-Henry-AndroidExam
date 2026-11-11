@@ -15,6 +15,7 @@ Library Management System.
 | Sign in | Email and password (Firebase Authentication), Show/Hide password, links to Forgot password and Create account; skipped when already signed in |
 | Create account | I am a student / teaching staff / non-teaching staff, full name, registration number or staff ID, email, password and confirmation, recovery PIN, all validated; sends a verification email |
 | Reset password | Sends a password-reset link to the student's email |
+| New password | The reset link opens this screen on the phone (Android App Link) or the web page `hosting/public/action.html` on any other device. The new password is typed twice; Save works only when both match and the live checklist (8+ characters, a letter, a number) is all green. A strength meter shows Weak/Fair/Good/Strong. Expired or used links offer a new one. The same screen finishes verify-email links |
 | Forgot your email? | Two-step account recovery without SMS: (1) registration number or staff ID, (2) the 6-digit recovery PIN chosen at sign-up. If both match, the account's email is shown and a reset link can be sent to it. Five wrong PINs lock the screen for 15 minutes. The PIN is never stored: the email is saved under the SHA-256 of ID + PIN (`recovery/{key}`) |
 | Catalogue | Greets the signed-in person with a colour-coded role badge; lists every book from the phone's SQLite copy of the shared catalogue (kept live from Cloud Firestore); live search by title, author or subject; shows how many copies are available |
 | Book details | Shelf location, subject, year, description and availability; Reserve button (disabled when no copies are left) |
@@ -62,6 +63,7 @@ Library rules enforced by the app:
 ```
 app/src/main/java/ug/ac/usjm/smartlibrary/
   LoginActivity.java, SignUpActivity.java, ForgotPasswordActivity.java   account screens
+  ResetPasswordActivity.java       opened by the email link: new password + confirmation
   auth/   AuthMessages (friendly Firebase errors), ProfileStore, PasswordToggle
   MainActivity.java            Screen 1 - catalogue + search
   BookDetailActivity.java      Screen 2 - book details
